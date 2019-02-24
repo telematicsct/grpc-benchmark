@@ -1,12 +1,8 @@
 package main
 
 import (
-	"crypto/rsa"
-	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"io"
-	"io/ioutil"
 	"log"
 	"time"
 )
