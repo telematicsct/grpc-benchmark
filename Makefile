@@ -34,3 +34,22 @@ image: ## Creates the docker images of the app and cleanups the intermediate
 	echo '>> build docker image'
 	docker build -t telematicsct/dcm-server .
 	docker image prune --force --filter label=stage=intermediate
+
+.PHONY: gencerts
+gencerts:
+	#rm -rf certs/*.crt certs/*.key certs/*.srl certs/*.csr
+	certs/gen.sh ca
+	certs/gen.sh server
+	certs/gen.sh client client1
+
+.PHONY: test
+test:
+	GO111MODULE=on go test -bench=. -benchmem
+
+.PHONY: grpc
+grpc:
+	cd server && go run main.go grpc
+
+.PHONY: https
+https:
+	cd server && go run main.go https
