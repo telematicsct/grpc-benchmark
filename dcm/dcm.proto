@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package dcm;
+
+// A block of data, to simply increase gRPC message size and test.
+message Payload {
+  // Primary contents of payload.
+  bytes body = 2;
+}
+
+// DCM service definition.
+service DCMService {
+    //DCM to Server client side streaming of diagnostic data
+    rpc DiagnosticData (stream DiagRecorderData) returns (DiagResponse) {}
+}
+
+// diagnostic data request message.
+message DiagResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+// diagnostic data response message.
+message DiagRecorderData {
+    int32 canId = 1;
+    Payload payload = 2;
+}
