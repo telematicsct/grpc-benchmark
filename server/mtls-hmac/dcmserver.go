@@ -2,15 +2,17 @@ package main
 
 import (
 	"crypto/rsa"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"io"
+	"io/ioutil"
 	"log"
 	"time"
 )
 
 // dcmServer is used to implement dcm.DCMServer.
 type dcmServer struct {
-	jwtPublicKey *rsa.PublicKey
 }
 
 //NewDCMServer creates an returns a new DCM server with JWT token
@@ -22,6 +24,7 @@ func NewDCMServer() *dcmServer {
 // It gets a stream of diagnostic data info, and responds with corresponding data
 func (s *dcmServer) DiagnosticData(stream pb.DCMService_DiagnosticDataServer) error {
 	start := time.Now()
+	log.Println("receiving streaming data: ")
 	for {
 		_, err := stream.Recv()
 		if err == io.EOF {

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"flag"
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
+	"github.com/telematicsct/grpc-benchmark/jwt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"log"
@@ -16,7 +17,7 @@ func main() {
 	var (
 		serverAddr = flag.String("server-addr", "localhost:7900", "Hello service address.")
 		tlsCert    = flag.String("tls-cert", "../certs/server-cert.pem", "TLS server certificate.")
-		// token      = flag.String("token", ".token", "Path to Hmac/JWT auth token.")
+		token      = flag.String("token", ".token", "Path to Hmac/JWT auth token.")
 	)
 	flag.Parse()
 
@@ -25,9 +26,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	jwtCred := jwt.New(*token)
 	conn, err := grpc.Dial(*serverAddr,
 		grpc.WithTransportCredentials(creds),
-		// grpc.WithPerRPCCredentials(jwtCreds),
+		grpc.WithPerRPCCredentials(jwtCred),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -40,12 +40,7 @@ func main() {
 
 	gs := grpc.NewServer(opts...)
 
-	//to-do jwt/hmac
-	dcm, err := NewDCMServer("")
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	dcm := NewDCMServer()
 	pb.RegisterDCMServiceServer(gs, dcm)
 
 	healthServer := health.NewServer()

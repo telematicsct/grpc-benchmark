@@ -14,3 +14,9 @@
 ### Run Client
 
 `go run client/mtls/main.go --tls-cert=certs/server-cert.pem`
+
+## gRPC mTLS Hmac
+
+### Run Client
+
+`go run client/mtls-hmac/main.go --tls-cert=certs/server-cert.pem --token=2730943b-ba0c-4038-bb5f-21965bf24b6d`
