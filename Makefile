@@ -19,12 +19,12 @@ clean: ## Cleanup any build binaries or packages
 .PHONY: static
 static:
 	GOOS=linux CGO_ENABLED=0 go build -tags "$(BUILDTAGS) static_build" -ldflags "-linkmode internal -extldflags -static" \
-    -o output/dcm-server main.go
+    -o output/dcm-service main.go
 
 .PHONY: static
 static-darwin:
 	GOOS=darwin CGO_ENABLED=0 go build -tags "$(BUILDTAGS) static_build" -ldflags "-linkmode internal -extldflags -static" \
-    -o output/dcm-server main.go
+    -o output/dcm-service main.go
 
 .PHONY: proto
 proto:
@@ -39,7 +39,7 @@ gencert:
 .PHONY: image
 image: ## Creates the docker images of the app and cleanups the intermediate
 	echo '>> build docker image'
-	docker build -t telematicsct/dcm-server .
+	docker build -t telematicsct/dcm-service .
 	docker image prune --force --filter label=stage=intermediate
 
 .PHONY: gencerts

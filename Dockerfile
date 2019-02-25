@@ -32,16 +32,16 @@ RUN make \
 
 # Compress go binary
 # https://linux.die.net/man/1/upx
-RUN upx -7 -qq output/dcm-server && \
-    upx -t output/dcm-server && \
-    mv output/dcm-server /go/bin/dcm-server
+RUN upx -7 -qq output/dcm-service && \
+    upx -t output/dcm-service && \
+    mv output/dcm-service /go/bin/dcm-service
 
 #gcr.io/distroless/base
 FROM scratch
 
 WORKDIR /app
 
-COPY --from=builder /go/bin/dcm-server ./
+COPY --from=builder /go/bin/dcm-service ./
 COPY --from=builder /app/certs/* ./certs/
 
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs
@@ -49,6 +49,6 @@ COPY --from=builder /etc/passwd /etc/passwd
 
 USER gkuser
 
-ENTRYPOINT [ "./dcm-server", "all", "--key=certs/server.crt", "--key=certs/server.key", "--ca=certs/ca.crt" ]
+ENTRYPOINT [ "./dcm-service", "all", "--key=certs/server.crt", "--key=certs/server.key", "--ca=certs/ca.crt" ]
 EXPOSE 7900
-EXPOSE 7901
+EXPOSE 8443
