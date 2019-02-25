@@ -124,3 +124,7 @@ func NewDCMServiceClient(listenAddr string) (pb.DCMServiceClient, error) {
 	}
 	return pb.NewDCMServiceClient(conn), nil
 }
+
+func NewDCMServiceClientFromConn(conn *grpc.ClientConn) (pb.DCMServiceClient, error) {
+	return pb.NewDCMServiceClient(conn), nil
+}

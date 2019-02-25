@@ -37,7 +37,7 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 func doPost(client *http.Client, data interface{}, b *testing.B) {
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(data)
-	resp, err := client.Post("https://localhost:8443/", "application/json", buf)
+	resp, err := client.Post("https://a3bae774238fe11e9b4530aa49b34ad2-baa821165bd29c97.elb.ap-northeast-1.amazonaws.com:8443/", "application/json", buf)
 	if err != nil {
 		b.Fatalf("http request failed: %v", err)
 	}
