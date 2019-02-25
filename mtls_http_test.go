@@ -1,4 +1,4 @@
-package benchmarks
+package main
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"testing"
 
-	mtlshttp "github.com/telematicsct/grpc-benchmark/server/https"
+	mtlshttp "github.com/telematicsct/grpc-benchmark/cmd/https"
 )
 
 var client *http.Client

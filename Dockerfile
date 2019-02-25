@@ -1,4 +1,4 @@
-FROM golang:1.11.1-alpine3.8 as builder
+FROM golang:1.11.4-alpine3.8 as builder
 LABEL stage=intermediate
 
 ENV PATH /go/bin:/usr/local/go/bin:$PATH
@@ -24,15 +24,9 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY Makefile .
-COPY dcm/* ./dcm/
-COPY server/mtls/*.go ./
+COPY . .
 
-COPY ./certs/server-cert.pem /go/bin/
-COPY ./certs/server-key.pem /go/bin/
-
-RUN make clean \
-    && make static \
+RUN make \
     && apk del .build-deps \
     && echo "Build complete."
 
@@ -48,14 +42,13 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /go/bin/dcm-server ./
-COPY --from=builder /go/bin/server-cert.pem ./
-COPY --from=builder /go/bin/server-key.pem ./
+COPY --from=builder /app/certs/* ./certs/
 
 COPY --from=builder /etc/ssl/certs/ /etc/ssl/certs
 COPY --from=builder /etc/passwd /etc/passwd
 
 USER gkuser
 
-ENTRYPOINT [ "./dcm-server" ]
+ENTRYPOINT [ "./dcm-server", "all", "--key=certs/server.crt", "--key=certs/server.key", "--ca=certs/ca.crt" ]
 EXPOSE 7900
 EXPOSE 7901

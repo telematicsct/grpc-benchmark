@@ -8,6 +8,8 @@ PKG 		:= github.com/telematicsct/grpc-benchmark
 BUILDTAGS 	:=
 DISTDIR 	:= ${PREFIX}/output
 
+all: clean static
+
 .PHONY: clean
 clean: ## Cleanup any build binaries or packages
 	$(RM) $(NAME)
@@ -17,7 +19,12 @@ clean: ## Cleanup any build binaries or packages
 .PHONY: static
 static:
 	GOOS=linux CGO_ENABLED=0 go build -tags "$(BUILDTAGS) static_build" -ldflags "-linkmode internal -extldflags -static" \
-    -o output/dcm-server *.go
+    -o output/dcm-server main.go
+
+.PHONY: static
+static-darwin:
+	GOOS=darwin CGO_ENABLED=0 go build -tags "$(BUILDTAGS) static_build" -ldflags "-linkmode internal -extldflags -static" \
+    -o output/dcm-server main.go
 
 .PHONY: proto
 proto:
@@ -46,10 +53,14 @@ gencerts:
 test:
 	GO111MODULE=on go test -bench=. -benchmem
 
+.PHONY: servers
+servers:
+	go run main.go all
+
 .PHONY: grpc
 grpc:
-	cd server && go run main.go grpc
+	go run main.go grpc
 
 .PHONY: https
 https:
-	cd server && go run main.go https
+	go run main.go https
