@@ -6,11 +6,36 @@ import (
 	"crypto/x509"
 	"errors"
 	"io/ioutil"
+	"net/http"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+func GetHTTPSClient() (*http.Client, error) {
+	caCert, err := ioutil.ReadFile("certs/ca.crt")
+	if err != nil {
+		return nil, err
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+	cert, err := tls.LoadX509KeyPair("certs/client.crt", "certs/client.key")
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      caCertPool,
+				Certificates: []tls.Certificate{cert},
+			},
+		},
+	}
+	return client, nil
+}
 
 func GetGRPCClient() (*grpc.ClientConn, error) {
 	certificate, err := tls.LoadX509KeyPair(

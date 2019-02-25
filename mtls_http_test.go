@@ -2,10 +2,7 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
@@ -14,29 +11,14 @@ import (
 	"github.com/telematicsct/grpc-benchmark/util"
 )
 
-var client *http.Client
+var httpclient *http.Client
 
 func init() {
-	caCert, err := ioutil.ReadFile("certs/ca.crt")
+	client, err := util.GetHTTPSClient()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-	cert, err := tls.LoadX509KeyPair("certs/client.crt", "certs/client.key")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	client = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs:      caCertPool,
-				Certificates: []tls.Certificate{cert},
-			},
-		},
-	}
+	httpclient = client
 }
 
 func Benchmark_MTLS_HTTP(b *testing.B) {
@@ -48,7 +30,7 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		doPost(client, u, b)
+		doPost(httpclient, u, b)
 	}
 }
 
