@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dcm-service
+spec:
+  selector:
+    matchLabels:
+      app: dcm
+      tier: backend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dcm
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: dcm-service
+          image: 837432931185.dkr.ecr.ap-northeast-1.amazonaws.com/dcm-service:latest
+          ports:
+            - name: grpc
+              containerPort: 7900
+            - name: https
+              containerPort: 8443
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: dcm
+# spec:
+#   replicas: 1
+#   selector:
+#     app: dcm
+#   template:
+#     metadata:
+#       labels:
+#         app: dcm
+#     spec:
+#       containers:
+#       - name: dcm
+#         image: 
+#         ports:
+#           - name: grpc
+#             containerPort: 7900
+#           - name: https
+#             containerPort: 8443
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app: dcm
+#   name: dcm
+#   annotations:
+#     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+# spec:
+#   ports:
+#     - name: grpc
+#       port: 7900
+#       targetPort: 7900
+#     - name: https
+#       port: 8443
+#       targetPort: 8443
+#   selector:
+#     app: dcm
+#   type: LoadBalancer
