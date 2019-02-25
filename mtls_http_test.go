@@ -40,6 +40,7 @@ func init() {
 
 func Benchmark_MTLS_HTTP(b *testing.B) {
 	u := &mtlshttp.DiagRecorderData{CanId: 11111, Payload: &mtlshttp.Payload{Body: getPayload(b)}}
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		doPost(client, u, b)
 	}

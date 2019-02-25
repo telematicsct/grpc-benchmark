@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Payload struct {
@@ -65,6 +66,7 @@ func CreateDiagRecorderData(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	time.Sleep(50 * time.Millisecond)
 	json.NewEncoder(w).Encode(DiagResponse{
 		Code:    200,
 		Message: "OK",

@@ -64,6 +64,12 @@ func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
 	payload := getPayload(b)
 	data := &pb.DiagRecorderData{CanId: 123456789, Payload: &pb.Payload{Body: payload}}
 
+	//warm up
+	for i := 0; i < 5; i++ {
+		doGRPC(c, data, b)
+	}
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		doGRPC(c, data, b)
 	}
@@ -73,6 +79,12 @@ func Benchmark_MTLS_GRPC_Protobuf_Stream(b *testing.B) {
 	c := pb.NewDCMServiceClient(getClient())
 	payload := getPayload(b)
 	data := &pb.DiagRecorderData{CanId: 123456789, Payload: &pb.Payload{Body: payload}}
+
+	//warm up
+	for i := 0; i < 5; i++ {
+		doGRPCStream(c, data, b)
+	}
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		doGRPCStream(c, data, b)
