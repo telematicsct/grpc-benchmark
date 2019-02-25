@@ -40,17 +40,16 @@ func init() {
 
 func Benchmark_MTLS_HTTP(b *testing.B) {
 	u := &mtlshttp.DiagRecorderData{CanId: 11111, Payload: &mtlshttp.Payload{Body: getPayload(b)}}
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(u)
-
 	for n := 0; n < b.N; n++ {
-		doPost(client, buf, b)
+		doPost(client, u, b)
 	}
 }
 
-func doPost(client *http.Client, data *bytes.Buffer, b *testing.B) {
+func doPost(client *http.Client, data interface{}, b *testing.B) {
 
-	resp, err := client.Post("https://localhost:8443/", "application/json", data)
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(data)
+	resp, err := client.Post("https://localhost:8443/", "application/json", buf)
 	if err != nil {
 		b.Fatalf("http request failed: %v", err)
 	}
