@@ -5,6 +5,7 @@ metadata:
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
+  externalTrafficPolicy: Local
   selector:
     app: dcm
     tier: backend
@@ -12,7 +13,9 @@ spec:
     - name: grpc
       port: 7900
       targetPort: 7900
+      protocol: TCP
     - name: https
       port: 8443
       targetPort: 8443
+      protocol: TCP
   type: LoadBalancer
