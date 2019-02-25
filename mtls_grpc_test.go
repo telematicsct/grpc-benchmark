@@ -1,6 +1,7 @@
 package benchmarks
 
 import (
+	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
@@ -11,12 +12,13 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func getClient() *grpc.ClientConn {
 	certificate, err := tls.LoadX509KeyPair(
-		"certs/client1.crt",
-		"certs/client1.key",
+		"certs/client.crt",
+		"certs/client.key",
 	)
 
 	certPool := x509.NewCertPool()
@@ -36,8 +38,11 @@ func getClient() *grpc.ClientConn {
 		RootCAs:      certPool,
 	})
 
-	dialOption := grpc.WithTransportCredentials(transportCreds)
-	conn, err := grpc.Dial("localhost:7900", dialOption)
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(transportCreds),
+		// grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")),
+	}
+	conn, err := grpc.Dial("localhost:7900", opts...)
 	if err != nil {
 		log.Fatalf("failed to dial server: %s", err)
 	}
@@ -45,33 +50,47 @@ func getClient() *grpc.ClientConn {
 	return conn
 }
 
+func getPayload(b *testing.B) []byte {
+	//100000 - 100kb
+	payload := make([]byte, 100000)
+	if _, err := rand.Read(payload); err != nil {
+		b.Fatalf("payload error %v", err)
+	}
+	return payload
+}
+
 func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
 	c := pb.NewDCMServiceClient(getClient())
+	payload := getPayload(b)
+	data := &pb.DiagRecorderData{CanId: 123456789, Payload: &pb.Payload{Body: payload}}
+
 	for n := 0; n < b.N; n++ {
-		doGRPC(c, b)
+		doGRPC(c, data, b)
 	}
 }
 
-func doGRPC(c pb.DCMServiceClient, b *testing.B) {
-	stream, err := c.DiagnosticData(context.Background())
+func doGRPC(c pb.DCMServiceClient, data *pb.DiagRecorderData, b *testing.B) {
+	resp, err := c.DiagnosticData(context.Background(), data)
+	if err != nil {
+		b.Fatalf("grpc request failed: %v", err)
+	}
+
+	if resp == nil || resp.Code != 200 {
+		b.Fatalf("wrong grpc response %v", resp)
+	}
+}
+
+func doGRPCStream(c pb.DCMServiceClient, data *pb.DiagRecorderData, b *testing.B) {
+
+	stream, err := c.DiagnosticDataStream(context.Background())
 	if err != nil {
 		b.Fatalf("%v.DiagnosticData(_) = _, %v", c, err)
 	}
-	payload := make([]byte, 1)
-	/*
-		_, err = rand.Read(payload)
-		if err != nil {
-			b.Fatalf("payload error %v", err)
-		}
-	*/
-	data := &pb.DiagRecorderData{CanId: 123456789, Payload: &pb.Payload{Body: payload}}
+
 	if err := stream.Send(data); err != nil {
 		b.Fatalf("send error %v", err)
 	}
 
-	if err != nil {
-		b.Fatalf("grpc request failed: %v", err)
-	}
 	reply, err := stream.CloseAndRecv()
 	if err != nil {
 		log.Fatalf("%v.CloseAndRecv() got error %v, want %v", stream, err, nil)

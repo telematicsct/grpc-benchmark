@@ -1,6 +1,7 @@
-package mtlsgrpc
+package grpc
 
 import (
+	"context"
 	"crypto/rsa"
 	"io"
 	"log"
@@ -19,9 +20,9 @@ func NewDCMServer() *dcmServer {
 	return &dcmServer{}
 }
 
-// DiagnosticData records a route composited of a sequence of points.
+// DiagnosticDataStream records a route composited of a sequence of points.
 // It gets a stream of diagnostic data info, and responds with corresponding data
-func (s *dcmServer) DiagnosticData(stream pb.DCMService_DiagnosticDataServer) error {
+func (s *dcmServer) DiagnosticDataStream(stream pb.DCMService_DiagnosticDataStreamServer) error {
 	start := time.Now()
 	for {
 		_, err := stream.Recv()
@@ -34,4 +35,10 @@ func (s *dcmServer) DiagnosticData(stream pb.DCMService_DiagnosticDataServer) er
 			return err
 		}
 	}
+}
+
+func (s *dcmServer) DiagnosticData(ctx context.Context, data *pb.DiagRecorderData) (*pb.DiagResponse, error) {
+	// time.Sleep(50 * time.Millisecond)
+	response := &pb.DiagResponse{Code: 200, Message: "Done"}
+	return response, nil
 }

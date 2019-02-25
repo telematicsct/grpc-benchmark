@@ -1,4 +1,4 @@
-package mtlshttp
+package https
 
 import (
 	"crypto/tls"
@@ -19,11 +19,11 @@ type DiagResponse struct {
 }
 
 type DiagRecorderData struct {
-	CanId int32 `json:"canId,omitempty"`
-	//Payload *Payload `json:"payload,omitempty"`
+	CanId   int32    `json:"canId,omitempty"`
+	Payload *Payload `json:"payload,omitempty"`
 }
 
-func Start(addr string, cert string, key string, ca string) error {
+func ServerMTLS(addr string, cert string, key string, ca string) error {
 	http.HandleFunc("/", CreateDiagRecorderData)
 	caCert, err := ioutil.ReadFile(ca)
 	if err != nil {

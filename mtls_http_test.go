@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"testing"
 
-	mtlshttp "github.com/telematicsct/grpc-benchmark/server/mtls-http"
+	mtlshttp "github.com/telematicsct/grpc-benchmark/server/https"
 )
 
 var client *http.Client
@@ -23,7 +23,7 @@ func init() {
 
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
-	cert, err := tls.LoadX509KeyPair("certs/client1.crt", "certs/client1.key")
+	cert, err := tls.LoadX509KeyPair("certs/client.crt", "certs/client.key")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,20 +39,18 @@ func init() {
 }
 
 func Benchmark_MTLS_HTTP(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		doPost(client, b)
-	}
-}
-
-func doPost(client *http.Client, b *testing.B) {
-	u := &mtlshttp.DiagRecorderData{
-		CanId: 11111,
-		//Payload: &httpsjson.Payload{make([]byte, 1024)}, // 1mb
-	}
+	u := &mtlshttp.DiagRecorderData{CanId: 11111, Payload: &mtlshttp.Payload{Body: getPayload(b)}}
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(u)
 
-	resp, err := client.Post("https://localhost:8443/", "application/json", buf)
+	for n := 0; n < b.N; n++ {
+		doPost(client, buf, b)
+	}
+}
+
+func doPost(client *http.Client, data *bytes.Buffer, b *testing.B) {
+
+	resp, err := client.Post("https://localhost:8443/", "application/json", data)
 	if err != nil {
 		b.Fatalf("http request failed: %v", err)
 	}
