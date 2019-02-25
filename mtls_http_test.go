@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	mtlshttp "github.com/telematicsct/grpc-benchmark/cmd/https"
+	"github.com/telematicsct/grpc-benchmark/util"
 )
 
 var client *http.Client
@@ -39,7 +40,11 @@ func init() {
 }
 
 func Benchmark_MTLS_HTTP(b *testing.B) {
-	u := &mtlshttp.DiagRecorderData{CanId: 11111, Payload: &mtlshttp.Payload{Body: getPayload(b)}}
+	body, err := util.GetPayload()
+	if err != nil {
+		b.Fatalf("%v", err)
+	}
+	u := &mtlshttp.DiagRecorderData{CanId: util.GetCanId(), Payload: &mtlshttp.Payload{Body: body}}
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		doPost(client, u, b)
@@ -47,7 +52,6 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 }
 
 func doPost(client *http.Client, data interface{}, b *testing.B) {
-
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(data)
 	resp, err := client.Post("https://localhost:8443/", "application/json", buf)
