@@ -18,7 +18,7 @@ case $cmd in
     openssl genrsa -out ca.key 2048
 
     # ca.crt
-    openssl req -new -key ca.key -x509 -days 3650 -out ca.crt -subj /C=US/ST=Texas/L=Plano/O=Toyota/CN="Benchmark Root CA" -extensions v3_ca -config $ca_config
+    openssl req -new -key ca.key -x509 -days 3650 -out ca.crt -extensions v3_ca -config $ca_config
     ;;
 
   server)

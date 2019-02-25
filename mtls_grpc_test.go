@@ -11,7 +11,7 @@ import (
 )
 
 func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
-	c, err := util.NewDCMServiceClient()
+	c, err := util.NewDCMServiceClient("localhost:7900")
 	if err != nil {
 		b.Fatalf("%v", err)
 	}
@@ -31,7 +31,7 @@ func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
 }
 
 func Benchmark_MTLS_GRPC_Protobuf_Stream(b *testing.B) {
-	c, err := util.NewDCMServiceClient()
+	c, err := util.NewDCMServiceClient("localhost:7900")
 	if err != nil {
 		b.Fatalf("%v", err)
 	}

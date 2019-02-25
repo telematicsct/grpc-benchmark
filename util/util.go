@@ -7,21 +7,36 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
+func getCertsBasePath() string {
+	path := os.Getenv("CERT_BASE_PATH")
+	if len(path) == 0 {
+		return "certs"
+	}
+	return path
+}
+
 func GetHTTPSClient() (*http.Client, error) {
-	caCert, err := ioutil.ReadFile("certs/ca.crt")
+	caCertPath := filepath.Join(getCertsBasePath(), "ca.crt")
+	clientCertPath := filepath.Join(getCertsBasePath(), "client.crt")
+	clientKeyPath := filepath.Join(getCertsBasePath(), "client.key")
+
+	caCert, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
 		return nil, err
 	}
 
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
-	cert, err := tls.LoadX509KeyPair("certs/client.crt", "certs/client.key")
+	cert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -37,14 +52,22 @@ func GetHTTPSClient() (*http.Client, error) {
 	return client, nil
 }
 
-func GetGRPCClient() (*grpc.ClientConn, error) {
-	certificate, err := tls.LoadX509KeyPair(
-		"certs/client.crt",
-		"certs/client.key",
-	)
+func GetGRPCClient(listenAddr string) (*grpc.ClientConn, error) {
+	host := listenAddr
+	if strings.Contains(listenAddr, ":") {
+		parts := strings.Split(listenAddr, ":")
+		host = parts[0]
+	}
+	caCertPath := filepath.Join(getCertsBasePath(), "ca.crt")
+	clientCertPath := filepath.Join(getCertsBasePath(), "client.crt")
+	clientKeyPath := filepath.Join(getCertsBasePath(), "client.key")
 
+	certificate, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+	if err != nil {
+		return nil, err
+	}
 	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile("certs/ca.crt")
+	bs, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +78,7 @@ func GetGRPCClient() (*grpc.ClientConn, error) {
 	}
 
 	transportCreds := credentials.NewTLS(&tls.Config{
-		ServerName:   "localhost",
+		ServerName:   host,
 		Certificates: []tls.Certificate{certificate},
 		RootCAs:      certPool,
 	})
@@ -64,7 +87,7 @@ func GetGRPCClient() (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(transportCreds),
 		// grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")),
 	}
-	conn, err := grpc.Dial("localhost:7900", opts...)
+	conn, err := grpc.Dial(listenAddr, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +117,8 @@ func NewDiagRecorderData() (*pb.DiagRecorderData, error) {
 	return data, nil
 }
 
-func NewDCMServiceClient() (pb.DCMServiceClient, error) {
-	conn, err := GetGRPCClient()
+func NewDCMServiceClient(listenAddr string) (pb.DCMServiceClient, error) {
+	conn, err := GetGRPCClient(listenAddr)
 	if err != nil {
 		return nil, err
 	}
