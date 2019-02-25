@@ -1,12 +1,14 @@
-package mtlsgrpc
+package grpc
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"google.golang.org/grpc/keepalive"
 	"io/ioutil"
 	"log"
 	"net"
+	"time"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"google.golang.org/grpc"
@@ -16,7 +18,8 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-func Start(listen string, cert string, key string, ca string) error {
+//Start starts the grpc server with the provided certificate
+func ServeMTLS(listen string, cert string, key string, ca string) error {
 	log.Println("grpc service starting...")
 
 	certificate, err := tls.LoadX509KeyPair(cert, key)
@@ -39,10 +42,10 @@ func Start(listen string, cert string, key string, ca string) error {
 	}
 
 	opts := []grpc.ServerOption{
-		// grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-		// 	MinTime:             1 * time.Minute,
-		// 	PermitWithoutStream: true,
-		// }),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             1 * time.Minute,
+			PermitWithoutStream: true,
+		}),
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 	}
 
@@ -61,7 +64,5 @@ func Start(listen string, cert string, key string, ca string) error {
 		return err
 	}
 
-	//log.Println("Hello service started successfully.")
-	//log.Fatal(http.ListenAndServe(*debugListenAddr, nil))
 	return gs.Serve(ln)
 }

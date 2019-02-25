@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	mtlsgrpc "github.com/telematicsct/grpc-benchmark/server/mtls-grpc"
-	mtlshttp "github.com/telematicsct/grpc-benchmark/server/mtls-http"
+	grpc "github.com/telematicsct/grpc-benchmark/server/grpc"
+	mtlshttp "github.com/telematicsct/grpc-benchmark/server/https"
 	"github.com/urfave/cli"
 )
 
@@ -42,7 +42,7 @@ func main() {
 			Usage: "https",
 			Flags: []cli.Flag{httpslistenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mtlshttp.Start(c.String("listen"), c.String("cert"), c.String("key"), c.String("ca"))
+				return mtlshttp.ServerMTLS(c.String("listen"), c.String("cert"), c.String("key"), c.String("ca"))
 			},
 		},
 		{
@@ -50,7 +50,7 @@ func main() {
 			Usage: "grpc",
 			Flags: []cli.Flag{grpclistenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mtlsgrpc.Start(c.String("listen"), c.String("cert"), c.String("key"), c.String("ca"))
+				return grpc.ServeMTLS(c.String("listen"), c.String("cert"), c.String("key"), c.String("ca"))
 			},
 		},
 	}

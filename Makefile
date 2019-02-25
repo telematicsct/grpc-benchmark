@@ -40,7 +40,7 @@ gencerts:
 	#rm -rf certs/*.crt certs/*.key certs/*.srl certs/*.csr
 	certs/gen.sh ca
 	certs/gen.sh server
-	certs/gen.sh client client1
+	certs/gen.sh client
 
 .PHONY: test
 test:

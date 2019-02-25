@@ -11,7 +11,8 @@ message Payload {
 // DCM service definition.
 service DCMService {
     //DCM to Server client side streaming of diagnostic data
-    rpc DiagnosticData (stream DiagRecorderData) returns (DiagResponse) {}
+    rpc DiagnosticData (DiagRecorderData) returns (DiagResponse) {}
+    rpc DiagnosticDataStream (stream DiagRecorderData) returns (DiagResponse) {}
 }
 
 // diagnostic data request message.
