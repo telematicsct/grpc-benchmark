@@ -2,8 +2,8 @@
     "proto": "./dcm/dcm.proto",
     "call": "dcm.DCMService.DiagnosticDataStream",
     "cacert": "certs/ca.crt",
-    "cert": "certs/server.crt",
-    "key": "certs/server.key",
+    "cert": "certs/client.crt",
+    "key": "certs/client.key",
     "c": 10,
     "n": 100000,
     "d": {
@@ -13,5 +13,5 @@
         }
     },
     "x": "5s",
-    "host": "localhost:7900"
+    "host": "a3bae774238fe11e9b4530aa49b34ad2-baa821165bd29c97.elb.ap-northeast-1.amazonaws.com:7900"
 }
