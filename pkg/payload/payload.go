@@ -1,7 +1,9 @@
 package payload
 
 import (
+	"bytes"
 	"crypto/rand"
+	"encoding/json"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 )
@@ -52,4 +54,14 @@ func NewDiagRecorderDataForHTTP() (*DiagRecorderData, error) {
 	}
 	data := &DiagRecorderData{CanId: GetCanID(), Payload: &Payload{Body: body}}
 	return data, nil
+}
+
+func GetHTTPJsonPayload() (string, error) {
+	data, err := NewDiagRecorderDataForHTTP()
+	if err != nil {
+		return "", nil
+	}
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(data)
+	return buf.String(), nil
 }
