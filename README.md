@@ -39,7 +39,7 @@
 | GRPC_MTLS | 1000 | 21.3 | 8 | 3.4 | 134.099 | 358.557 | 287.5 |433.33 | 613.64 | 721.94 | 732.77 | 733.969 |
 | GRPC_MTLS_HMAC | 1000 | 18.1 | 8 | 3.3 | 217.111 | 431.567 | 431.82 | 500 | 645.81 | 733.3 | 742.04 | 743.016 |
 
-See report -> GH-2
+See [Report](https://github.com/telematicsct/grpc-benchmark/issues/2)
 
 ### RUN2 (Data: 100KB)
 
@@ -51,7 +51,7 @@ See report -> GH-2
 | GRPC_MTLS | 1000 | 44.1 | 8 | 5.1 | 121.162 | 179.044 | 171.62 | 197.07 | 276.11 | 344.97 | 352.76 | 353.625 | 
 | GRPC_MTLS_HMAC | 1000 | 37.8 | 8 | 5.3 | 123.326 | 205.094 | 180.4 | 234.78 | 300 | 750 | 813.94 | 821.039 |
 
-See report -> GH-3
+See [Report](https://github.com/telematicsct/grpc-benchmark/issues/3)
 
 ### RUN3 (Data: 1mb)
 
@@ -63,7 +63,7 @@ See report -> GH-3
 | GRPC_MTLS | 1000 | 36.6 | 8 | 5 | 136.585 | 215.997 | 204.82 | 261.45 | 295.42| 377.05 | 386.99 | 388.093 |
 | GRPC_MTLS_HMAC | 1000 | 37.6 | 8 | 5 | 129.592 | 209.796 | 206.59 | 259.89 | 291.87 | 406.76 | 410.62 | 411.051 |
 
-See report -> GH-4
+See [Report](https://github.com/telematicsct/grpc-benchmark/issues/4)
 
 ### Summary
 
