@@ -27,9 +27,9 @@
 |   Benchmark_MTLS_HTTP_JSON-8                   |    50      |     25730243 ns/op   |     3534994 B/op    |   438 allocs/op |
 |   Benchmark_TLS_HTTP_HMAC_JSON-8               |    50      |     26732076 ns/op   |     3780368 B/op    |   258 allocs/op |
 
-## Load Test using modified fortio
+## Load Test Runs (using modified fortio tool)
 
-### RUN1 (Data: 100KB)
+### RUN1 (Data: 100KB) GH-2
 
 | Name | count | qps | conns | duration(s) | min(ms) | avg(ms) | p50(ms) | p75(ms) | p90(ms) | p99(ms) | p99.9(ms) | max(ms) |
 | :--- | :---:| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | 
@@ -39,5 +39,30 @@
 | GRPC_MTLS | 1000 | 21.3 | 8 | 3.4 | 134.099 | 358.557 | 287.5 |433.33 | 613.64 | 721.94 | 732.77 | 733.969 |
 | GRPC_MTLS_HMAC | 1000 | 18.1 | 8 | 3.3 | 217.111 | 431.567 | 431.82 | 500 | 645.81 | 733.3 | 742.04 | 743.016 |
 
-### RUN2 (Data: 100KB)
+### RUN2 (Data: 100KB) GH-3
 
+| Name | count | qps | conns | duration(s) | min(ms) | avg(ms) | p50(ms) | p75(ms) | p90(ms) | p99(ms) | p99.9(ms) | max(ms) |
+| :--- | :---:| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | 
+| HTTP_TLS_HMAC | 1000 | 8 | 8 | 6 | 857.031 | 958.272 | 950.98 | 1000 | 1036.94 | 1059.1 | 1061.32 | 1061.564 |
+| HTTP_MTLS_HMAC | 1000 | 8.3 | 8 | 5.8 | 850.158 | 901.073 | 925.08 | 964.17 | 987.62 | 1151.1 | 1276.63 | 1290.58 |
+| HTTP_MTLS | 1000 | 5 | 8.3 | 5.8 | 866.123 | 933.91 | 945.08 | 986.27 | 1023.19 | 1054.49 | 1057.62 | 1057.963 |
+| GRPC_MTLS | 1000 | 44.1 | 8 | 5.1 | 121.162 | 179.044 | 171.62 | 197.07 | 276.11 | 344.97 | 352.76 | 353.625 | 
+| GRPC_MTLS_HMAC | 1000 | 37.8 | 8 | 5.3 | 123.326 | 205.094 | 180.4 | 234.78 | 300 | 750 | 813.94 | 821.039 |
+
+### RUN3 (Data: 1mb) GH-4
+
+| Name | count | qps | conns | duration(s) | min(ms) | avg(ms) | p50(ms) | p75(ms) | p90(ms) | p99(ms) | p99.9(ms) | max(ms) |
+| :--- | :---:| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | 
+| HTTP_TLS_HMAC | 1000 | 8 | 8 | 5 | 850.321 | 955.098 | 957.9 | 1020.27 | 1068.92 | 1098.11 | 1101.03 | 1101.35 |
+| HTTP_MTLS_HMAC | 1000 | 8.5 | 8 | 5 | 865.712 | 922.695 | 926.41 | 958.09 | 977.09 | 988.49 | 989.63 | 989.756 |
+| HTTP_MTLS | 1000 | 7.2 | 8 | 5 | 929.99 | 1020.397 | 1013.5 | 1087.78 | 1132.34 | 1159.08 | 1161.76 | 1162.054 |
+| GRPC_MTLS | 1000 | 36.6 | 8 | 5 | 136.585 | 215.997 | 204.82 | 261.45 | 295.42| 377.05 | 386.99 | 388.093 |
+| GRPC_MTLS_HMAC | 1000 | 37.6 | 8 | 5 | 129.592 | 209.796 | 206.59 | 259.89 | 291.87 | 406.76 | 410.62 | 411.051 |
+
+### Summary
+
+As per the reports above
+- for 1mb data, gRPC with mTLS (avg: 200ms) is faster than https with mTLS (avg: 850ms)
+- for 100kb data, gRPC with mTLS (avg: 120ms) is faster than https with mTLS (avg: 850ms)
+- 1mb or 100kb data, https has same average response time.
+- gRPC mTLS with HMAC or without HMAC -- doesn't make a big difference.
