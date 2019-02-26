@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
+	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 	"github.com/telematicsct/grpc-benchmark/server"
 )
 
@@ -50,14 +51,14 @@ func (*hmacHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var data DiagRecorderData
+	var data payload.DiagRecorderData
 	decoder.Decode(&data)
 	defer r.Body.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 
 	//time.Sleep(50 * time.Millisecond)
-	json.NewEncoder(w).Encode(DiagResponse{
+	json.NewEncoder(w).Encode(payload.DiagResponse{
 		Code:    200,
 		Message: "OK",
 	})

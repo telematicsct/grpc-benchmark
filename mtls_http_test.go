@@ -3,25 +3,22 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"testing"
 
-	mhttp "github.com/telematicsct/grpc-benchmark/cmd/mtls/http"
 	"github.com/telematicsct/grpc-benchmark/pkg/client"
 	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 )
 
-func Benchmark_MTLS_HTTP(b *testing.B) {
+func Benchmark_MTLS_HTTP_JSON(b *testing.B) {
 	client, err := client.NewHTTPSClient()
 	if err != nil {
-		log.Fatal(err)
+		b.Fatalf("error: %v", err)
 	}
-	body, err := payload.GetPayload()
+	data, err := payload.NewDiagRecorderDataForHTTP()
 	if err != nil {
-		b.Fatalf("%v", err)
+		b.Fatalf("error: %v", err)
 	}
-	u := &mhttp.DiagRecorderData{CanId: payload.GetCanID(), Payload: &mhttp.Payload{Body: body}}
 	b.ResetTimer()
 
 	// for n := 0; n < b.N; n++ {
@@ -30,7 +27,7 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			doPost(client, u, b)
+			doPost(client, data, b)
 		}
 	})
 }
@@ -46,7 +43,7 @@ func doPost(hclient *http.Client, data interface{}, b *testing.B) {
 	defer resp.Body.Close()
 
 	// We need to parse response to have a fair comparison as gRPC does it
-	var target mhttp.DiagResponse
+	var target payload.DiagResponse
 	decodeErr := json.NewDecoder(resp.Body).Decode(&target)
 	if decodeErr != nil {
 		b.Fatalf("unable to decode json: %v", decodeErr)

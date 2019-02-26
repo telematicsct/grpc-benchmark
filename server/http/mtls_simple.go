@@ -9,22 +9,9 @@ import (
 	"net/http"
 
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
+	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 	"github.com/telematicsct/grpc-benchmark/server"
 )
-
-type Payload struct {
-	Body []byte `json:"body,omitempty"`
-}
-
-type DiagResponse struct {
-	Code    int32  `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
-}
-
-type DiagRecorderData struct {
-	CanId   int32    `json:"canId,omitempty"`
-	Payload *Payload `json:"payload,omitempty"`
-}
 
 type defaultHandler struct {
 	http.Handler
@@ -76,14 +63,14 @@ func doServe(opts *server.ServerOptions, listen string, handler http.Handler, au
 
 func (*defaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var data DiagRecorderData
+	var data payload.DiagRecorderData
 	decoder.Decode(&data)
 	defer r.Body.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 
 	//time.Sleep(50 * time.Millisecond)
-	json.NewEncoder(w).Encode(DiagResponse{
+	json.NewEncoder(w).Encode(payload.DiagResponse{
 		Code:    200,
 		Message: "OK",
 	})

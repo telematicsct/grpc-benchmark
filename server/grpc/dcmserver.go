@@ -18,8 +18,6 @@ var jwtToken *auth.JWT
 // dcmServer is used to implement dcm.DCMServer.
 type dcmServer struct {
 	authType auth.AuthType
-
-	apiKey string
 }
 
 //NewDCMServer creates an returns a new DCM server with JWT token

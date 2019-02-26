@@ -10,8 +10,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtPublicKey *rsa.PublicKey
-
 type JWT struct {
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
@@ -86,22 +84,3 @@ func (j *JWT) Validate(token string) (*jwt.Token, error) {
 	}
 	return nil, err
 }
-
-// type jwt struct {
-// 	token string
-// }
-
-// // New holds per-rpc metadata for the gRPC clients
-// func New(token string) credentials.PerRPCCredentials {
-// 	return jwt{token}
-// }
-
-// func (j jwt) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-// 	return map[string]string{
-// 		"authorization": j.token,
-// 	}, nil
-// }
-
-// func (j jwt) RequireTransportSecurity() bool {
-// 	return true
-// }
