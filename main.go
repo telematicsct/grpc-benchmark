@@ -76,6 +76,12 @@ func main() {
 				}()
 
 				go func() {
+					if err := mhttp.ServeHMAC(cliopts); err != nil {
+						log.Fatalf("failed to start http mtls (HMAC) server: %s", err)
+					}
+				}()
+
+				go func() {
 					if err := mgrpc.Serve(cliopts); err != nil {
 						log.Fatalf("failed to start gRPC mtls server: %s", err)
 					}
@@ -83,7 +89,7 @@ func main() {
 
 				go func() {
 					if err := mgrpc.ServeHMAC(cliopts); err != nil {
-						log.Fatalf("failed to start gRPC mtls server: %s", err)
+						log.Fatalf("failed to start gRPC mtls (HMAC) server: %s", err)
 					}
 				}()
 

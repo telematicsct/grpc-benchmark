@@ -65,9 +65,10 @@ func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, d
 	healthServer.SetServingStatus("grpc.health.v1.dcmservice", 1)
 	healthpb.RegisterHealthServer(gs, healthServer)
 
-	if dcm.jwtPrivateKey != nil {
+	switch dcm.authType {
+	case JWTAuth:
 		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
-	} else {
+	default:
 		log.Println("GRPC MTLS Listening at", listen)
 	}
 

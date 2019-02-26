@@ -25,8 +25,15 @@ type DiagRecorderData struct {
 	Payload *Payload `json:"payload,omitempty"`
 }
 
+type defaultHandler struct {
+	http.Handler
+}
+
 func Serve(cliopts *cmd.CliOptions) error {
-	http.HandleFunc("/", CreateDiagRecorderData)
+	return doServe(cliopts, cliopts.HTTPHostPort, &defaultHandler{}, NoAuth)
+}
+
+func doServe(cliopts *cmd.CliOptions, listen string, handler http.Handler, authType AuthType) error {
 	caCert, err := ioutil.ReadFile(cliopts.CACertPath)
 	if err != nil {
 		return err
@@ -47,11 +54,18 @@ func Serve(cliopts *cmd.CliOptions) error {
 	tlsConfig.BuildNameToCertificate()
 
 	server := &http.Server{
-		Addr:      cliopts.HTTPHostPort,
+		Addr:      listen,
 		TLSConfig: tlsConfig,
+		Handler:   handler,
 	}
 
-	log.Println("HTTP MTLS Listening at", cliopts.HTTPHostPort)
+	switch authType {
+	case JWTAuth:
+		log.Println("HTTP MTLS HMAC(JWT) Listening at", listen)
+	default:
+		log.Println("HTTP MTLS Listening at", listen)
+	}
+
 	err = server.ListenAndServeTLS(cliopts.ServerCertPath, cliopts.ServerKeyPath)
 	if err != nil {
 		return err
@@ -59,7 +73,7 @@ func Serve(cliopts *cmd.CliOptions) error {
 	return nil
 }
 
-func CreateDiagRecorderData(w http.ResponseWriter, r *http.Request) {
+func (*defaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var data DiagRecorderData
 	decoder.Decode(&data)
