@@ -5,9 +5,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-//NewDCMServiceClient returns a new DCM service client
 func NewDCMServiceClient(connectAddr string) (pb.DCMServiceClient, error) {
-	conn, err := NewGRPCClient(connectAddr)
+	return NewDCMServiceClientWithAuth(connectAddr, "")
+}
+
+//NewDCMServiceClientWithAuth returns a new DCM service client
+func NewDCMServiceClientWithAuth(connectAddr string, token string) (pb.DCMServiceClient, error) {
+	conn, err := NewGRPCClient(connectAddr, token)
 	if err != nil {
 		return nil, err
 	}

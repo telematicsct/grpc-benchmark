@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -32,7 +33,7 @@ func GetGRPCHmacUrl() string {
 }
 
 //NewGRPCClient returns a new gRPC client
-func NewGRPCClient(listenAddr string) (*grpc.ClientConn, error) {
+func NewGRPCClient(listenAddr string, token string) (*grpc.ClientConn, error) {
 	host := listenAddr
 	if strings.Contains(listenAddr, ":") {
 		parts := strings.Split(listenAddr, ":")
@@ -65,10 +66,34 @@ func NewGRPCClient(listenAddr string) (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(transportCreds),
 		// grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")),
 	}
+
+	if token != "" {
+		opts = append(opts, grpc.WithPerRPCCredentials(NewTokenAuth(token)))
+	}
+
 	conn, err := grpc.Dial(listenAddr, opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	return conn, nil
+}
+
+type tokenAuth struct {
+	token string
+}
+
+// New holds per-rpc metadata for the gRPC clients
+func NewTokenAuth(token string) credentials.PerRPCCredentials {
+	return tokenAuth{token}
+}
+
+func (j tokenAuth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return map[string]string{
+		"authorization": j.token,
+	}, nil
+}
+
+func (j tokenAuth) RequireTransportSecurity() bool {
+	return true
 }

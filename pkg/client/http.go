@@ -23,6 +23,7 @@ var (
 	caCertPath     = env.GetString(CertBasePath, "certs/ca.crt")
 	clientCertPath = env.GetString(CertBasePath, "certs/client.crt")
 	clientKeyPath  = env.GetString(CertBasePath, "certs/client.key")
+	jwtTokenPath   = env.GetString(CertBasePath, "certs/jwt.token")
 )
 
 // GetHTTPUrl returns http url
@@ -58,4 +59,12 @@ func NewHTTPSClient() (*http.Client, error) {
 		},
 	}
 	return client, nil
+}
+
+func GetJWTToken() string {
+	data, err := ioutil.ReadFile(jwtTokenPath)
+	if err != nil {
+		return ""
+	}
+	return string(data)
 }
