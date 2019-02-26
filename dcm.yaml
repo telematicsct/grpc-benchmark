@@ -20,7 +20,13 @@ spec:
         - name: dcm-service
           image: 837432931185.dkr.ecr.ap-northeast-1.amazonaws.com/dcm-service:latest
           ports:
-            - name: grpc
+            - name: grpc-mtls
               containerPort: 7900
-            - name: https
+            - name: grpc-mtls-hmac
+              containerPort: 8900
+            - name: https-mtls-hmac
+              containerPort: 7443
+            - name: https-mtls
               containerPort: 8443
+            - name: https-hmac
+              containerPort: 9443

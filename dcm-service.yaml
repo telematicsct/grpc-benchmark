@@ -10,12 +10,24 @@ spec:
     app: dcm
     tier: backend
   ports:
-    - name: grpc
+    - name: grpc-mtls
       port: 7900
       targetPort: 7900
       protocol: TCP
-    - name: https
+    - name: grpc-mtls-hmac
+      port: 8900
+      targetPort: 8900
+      protocol: TCP
+    - name: https-mtls-hmac
+      port: 7443
+      targetPort: 7443
+      protocol: TCP
+    - name: https-mtls
       port: 8443
       targetPort: 8443
+      protocol: TCP
+    - name: https-hmac
+      port: 9443
+      targetPort: 9443
       protocol: TCP
   type: LoadBalancer

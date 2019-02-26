@@ -61,6 +61,16 @@ func (s *dcmServer) DiagnosticDataStream(stream dcm.DCMService_DiagnosticDataStr
 	}
 }
 
+func (s *dcmServer) DiagnosticDataHMAC(ctx context.Context, data *dcm.DiagRecorderData) (*dcm.DiagResponse, error) {
+	//time.Sleep(50 * time.Millisecond)
+	_, err := jwtAuthFunc(ctx)
+	if err != nil {
+		return nil, err
+	}
+	response := &dcm.DiagResponse{Code: 200, Message: "Done"}
+	return response, nil
+}
+
 func (s *dcmServer) DiagnosticData(ctx context.Context, data *dcm.DiagRecorderData) (*dcm.DiagResponse, error) {
 	//time.Sleep(50 * time.Millisecond)
 	switch s.authType {

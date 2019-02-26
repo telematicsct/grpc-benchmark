@@ -12,6 +12,7 @@ message Payload {
 service DCMService {
     //DCM to Server client side streaming of diagnostic data
     rpc DiagnosticData (DiagRecorderData) returns (DiagResponse) {}
+    rpc DiagnosticDataHMAC (DiagRecorderData) returns (DiagResponse) {}
     rpc DiagnosticDataStream (stream DiagRecorderData) returns (DiagResponse) {}
 }
 

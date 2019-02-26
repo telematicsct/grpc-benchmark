@@ -51,4 +51,7 @@ USER gkuser
 
 ENTRYPOINT [ "./dcm-service", "all", "--key=certs/server.crt", "--key=certs/server.key", "--ca=certs/ca.crt" ]
 EXPOSE 7900
+EXPOSE 8900
+EXPOSE 7443
 EXPOSE 8443
+EXPOSE 9443

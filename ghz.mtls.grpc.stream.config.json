@@ -1,0 +1,17 @@
+{
+    "proto": "./dcm/dcm.proto",
+    "call": "dcm.DCMService.DiagnosticDataStream",
+    "cacert": "certs/ca.crt",
+    "cert": "certs/client.crt",
+    "key": "certs/client.key",
+    "c": 100,
+    "n": 1000000,
+    "d": {
+        "canId": 1132456789,
+        "payload": {
+            "body": "Wzg3wyMTf8OLesXtTKHMgeLu2FIE4iQDpt5qHgUbPPVmfd5ZOp0yz4KqXYj2gjIIpWj1FLhH8Kan5UQuy9YwzK8ixNPr5cycFgpKErepyXhSSvUsWbWtuynGQXQRQFTaJ78UTcGgiWhJLfEof1JVzCnz3FIOQLzbvyxMNH6kpbk5OorPh18W5P22JpWmCJ72TQb8Yx7dQkwFHCoWuqMLFMdpeR0GXll1cBGvBOkzojsyXsegxu2uowtR728fYfHC5S76PryD6W53zs936yxPRPUAkzRfDqtJgmhitcr7VBv9E0aPzZB8NM3yicPXdgUr9PDZfxvmWXXjDIO89bemJm1Jb16Q8vzev7kKweBQt8J210Nbq5TWzQfi9I0ojzEDZfdixC7kgt40XSVW0GF5dsUgg9zM2IlCSxBwWStYxaQB861Gm1rhkpByp6A3JFQSNOxqa46iAgxKr56Z8HhPC8jLCr1xfChWpA5Z8EwF9fqkYbbq0XhgZqqFv6NmciLrBkXLCl92UC2uEYc782gL8N6eSvHBNLBppoXKfoU03BM7rF5ZHi28fGkmGAS9NpAkTBxhUMlNsvalMdV6x5GySI9Xh7t1UmcalwovQNxSV2RJWFrlmiE9DbNjLFCk0zcDmOmQ4hoO5KaXe9jJWd8vkIGyGc35EEEu745sdXnG40HF8aT5RneR0FpLk656SKsuxobtIf0JlYhKGQM71uR1QJAw5pckI5Rc8tuNaQTkTEnQ2YqDCNInebRyMOxP1gudCJ1RpzwgEl0p3NeYWd09CwCL8zddwkZzlPeysILFt8bSsUYKakNfnZxitIgkFOUjehLiu89x14urlnaxmoPfQ3l02z7xSD3X1Dn7jnZ8ShxobGFSu96wlGAKko3imnwsBJVjpFtL0XF9vqKcAgxa5X8BFBOG99zVRKHb4UkhyXmBTWgCn09KqMJ0lJxMVe1NPraNqr070fANa5YwzyBX2oDEawWI8vgv4NK2sjAW"
+        }
+    },
+    "x": "5s",
+    "host": "localhost:7900"
+}
