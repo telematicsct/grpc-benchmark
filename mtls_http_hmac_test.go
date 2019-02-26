@@ -44,7 +44,7 @@ func doHmacPost(hclient *http.Client, data interface{}, b *testing.B) {
 		b.Fatalf("http request failed: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "application/json")
+	req.Header.Set("Authorization", client.GetJWTToken())
 
 	resp, err := hclient.Do(req)
 	if err != nil {

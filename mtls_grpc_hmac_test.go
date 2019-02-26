@@ -12,8 +12,8 @@ import (
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
-func Benchmark_MTLS_GRPC_JWT_Protobuf(b *testing.B) {
-	c, err := client.NewDCMServiceClient(client.GetGRPCHmacUrl())
+func Benchmark_MTLS_GRPC_HMAC_Protobuf(b *testing.B) {
+	c, err := client.NewDCMServiceClientWithAuth(client.GetGRPCHmacUrl(), client.GetJWTToken())
 	if err != nil {
 		b.Fatalf("%v", err)
 	}
@@ -38,8 +38,8 @@ func Benchmark_MTLS_GRPC_JWT_Protobuf(b *testing.B) {
 	// }
 }
 
-func Benchmark_MTLS_GRPC_JWT_Protobuf_Stream(b *testing.B) {
-	c, err := client.NewDCMServiceClient(client.GetGRPCHmacUrl())
+func Benchmark_MTLS_GRPC_HMAC_Protobuf_Stream(b *testing.B) {
+	c, err := client.NewDCMServiceClientWithAuth(client.GetGRPCHmacUrl(), client.GetJWTToken())
 	if err != nil {
 		b.Fatalf("%v", err)
 	}
