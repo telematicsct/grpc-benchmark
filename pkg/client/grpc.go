@@ -19,8 +19,8 @@ const (
 )
 
 var (
-	grpcURL     = env.GetString(GRPC_URL, "localhost:7900")
-	grpcHmacURL = env.GetString(GRPC_HMAC_URL, "localhost:8900")
+	grpcURL     = env.GetString(GRPC_URL, TARGET_HOST+":7900")
+	grpcHmacURL = env.GetString(GRPC_HMAC_URL, TARGET_HOST+":8900")
 )
 
 // GetGRPCUrl grpc url

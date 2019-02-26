@@ -15,15 +15,17 @@ const (
 	//CertBasePath base path for certificates
 	CertBasePath = "CERT_BASE_PATH"
 	// HTTPURL is http url
+	TARGET_HOST        = "TARGET_HOST"
 	HTTP_MTLS_URL      = "HTTP_MTLS_URL"
 	HTTP_MTLS_HMAC_URL = "HTTP_MTLS_HMAC_URL"
 	HTTP_TLS_HMAC_URL  = "HTTP_TLS_HMAC_URL"
 )
 
 var (
-	httpMTLSSimpleURL = env.GetString(HTTP_MTLS_URL, "https://localhost:8443")
-	httpMTLSHmacURL   = env.GetString(HTTP_MTLS_HMAC_URL, "https://localhost:9443")
-	httpTLSHmacURL    = env.GetString(HTTP_TLS_HMAC_URL, "https://localhost:7443")
+	targetHost        = env.GetString(TARGET_HOST, "localhost")
+	httpMTLSSimpleURL = env.GetString(HTTP_MTLS_URL, "https://"+TARGET_HOST+":8443")
+	httpMTLSHmacURL   = env.GetString(HTTP_MTLS_HMAC_URL, "https://"+TARGET_HOST+":9443")
+	httpTLSHmacURL    = env.GetString(HTTP_TLS_HMAC_URL, "https://"+TARGET_HOST+":7443")
 	caCertPath        = env.GetString(CertBasePath, "certs/ca.crt")
 	clientCertPath    = env.GetString(CertBasePath, "certs/client.crt")
 	clientKeyPath     = env.GetString(CertBasePath, "certs/client.key")

@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
+	"strconv"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
+	"github.com/telematicsct/grpc-benchmark/pkg/env"
 )
 
 type Payload struct {
@@ -22,10 +25,24 @@ type DiagRecorderData struct {
 	Payload *Payload `json:"payload,omitempty"`
 }
 
-//GetPayload returns a payload of size 100kb
+const (
+	PayloadSizeKey = "PAYLOAD_SIZE"
+)
+
+var payloadSize = initPayloadSize()
+
+func initPayloadSize() int {
+	size, _ := strconv.Atoi(env.GetString(PayloadSizeKey, "1000000"))
+	if size == 0 {
+		size = 1000 * 1000 // 1mb
+	}
+	fmt.Println("payload size", size)
+	return size
+}
+
+//GetPayload returns a payload
 func GetPayload() ([]byte, error) {
-	//100000 - 100kb
-	payload := make([]byte, 100000)
+	payload := make([]byte, payloadSize)
 	if _, err := rand.Read(payload); err != nil {
 		return nil, err
 	}
