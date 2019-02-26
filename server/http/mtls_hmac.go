@@ -2,34 +2,21 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/telematicsct/grpc-benchmark/pkg/jwt"
 	"log"
 	"net/http"
 
-	"github.com/telematicsct/grpc-benchmark/cmd"
+	"github.com/telematicsct/grpc-benchmark/pkg/auth"
+	"github.com/telematicsct/grpc-benchmark/server"
 )
 
-const (
-	AuthorizationKey = "authorization"
-)
-
-type AuthType int
-
-const (
-	NoAuth AuthType = iota
-	JWTAuth
-	APIKeyAuth
-	HmacAuth
-)
-
-var jwtToken *jwt.JWT
+var jwtToken *auth.JWT
 
 type hmacHandler struct {
 	http.Handler
 }
 
-func newJWT(cliopts *cmd.CliOptions) error {
-	j, err := jwt.New(cliopts.JWTPrivateKey, cliopts.JWTPublicKey)
+func newJWT(opts *server.ServerOptions) error {
+	j, err := auth.New(opts.JWTPrivateKey, opts.JWTPublicKey)
 	if err != nil {
 		return err
 	}
@@ -42,16 +29,16 @@ func newJWT(cliopts *cmd.CliOptions) error {
 	return nil
 }
 
-func ServeHMAC(cliopts *cmd.CliOptions) error {
-	err := newJWT(cliopts)
+func ServeMTLSHMAC(opts *server.ServerOptions) error {
+	err := newJWT(opts)
 	if err != nil {
 		return err
 	}
-	return doServe(cliopts, cliopts.HTTPHMACHostPort, &hmacHandler{}, JWTAuth)
+	return doServe(opts, opts.HTTPHMACHostPort, &hmacHandler{}, auth.JWTAuth)
 }
 
 func (*hmacHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	token := r.Header.Get(AuthorizationKey)
+	token := r.Header.Get(auth.AuthorizationKey)
 	if token == "" {
 		http.Error(w, "token missing", 500)
 		return

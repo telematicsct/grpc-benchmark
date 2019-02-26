@@ -9,28 +9,28 @@ import (
 	"net"
 	"time"
 
-	"google.golang.org/grpc/keepalive"
-
-	"github.com/telematicsct/grpc-benchmark/cmd"
-	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/keepalive"
+
+	pb "github.com/telematicsct/grpc-benchmark/dcm"
+	"github.com/telematicsct/grpc-benchmark/pkg/auth"
+	"github.com/telematicsct/grpc-benchmark/server"
 )
 
-func Serve(cliopts *cmd.CliOptions) error {
+func ServeMTLS(opts *server.ServerOptions) error {
 	dcm := NewDCMServer()
-	return goServe(cliopts, cliopts.GRPCHostPort, nil, dcm)
+	return goServe(opts, opts.GRPCHostPort, nil, dcm)
 }
 
 // Start starts the grpc server with the provided certificate
-func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, dcm *dcmServer) error {
-	certificate, err := tls.LoadX509KeyPair(cliopts.ServerCertPath, cliopts.ServerKeyPath)
+func goServe(opts *server.ServerOptions, listen string, grpcoption grpc.ServerOption, dcm *dcmServer) error {
+	certificate, err := tls.LoadX509KeyPair(opts.ServerCertPath, opts.ServerKeyPath)
 
 	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile(cliopts.CACertPath)
+	bs, err := ioutil.ReadFile(opts.CACertPath)
 	if err != nil {
 		return err
 	}
@@ -46,18 +46,18 @@ func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, d
 		ClientCAs:    certPool,
 	}
 
-	opts := []grpc.ServerOption{
+	grpcopts := []grpc.ServerOption{
 		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
 			MinTime:             1 * time.Minute,
 			PermitWithoutStream: true,
 		}),
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 	}
-	if option != nil {
-		opts = append(opts, option)
+	if grpcoption != nil {
+		grpcopts = append(grpcopts, grpcoption)
 	}
 
-	gs := grpc.NewServer(opts...)
+	gs := grpc.NewServer(grpcopts...)
 
 	pb.RegisterDCMServiceServer(gs, dcm)
 
@@ -66,7 +66,7 @@ func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, d
 	healthpb.RegisterHealthServer(gs, healthServer)
 
 	switch dcm.authType {
-	case JWTAuth:
+	case auth.JWTAuth:
 		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
 	default:
 		log.Println("GRPC MTLS Listening at", listen)

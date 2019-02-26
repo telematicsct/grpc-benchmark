@@ -8,7 +8,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/telematicsct/grpc-benchmark/cmd"
+	"github.com/telematicsct/grpc-benchmark/pkg/auth"
+	"github.com/telematicsct/grpc-benchmark/server"
 )
 
 type Payload struct {
@@ -29,12 +30,12 @@ type defaultHandler struct {
 	http.Handler
 }
 
-func Serve(cliopts *cmd.CliOptions) error {
-	return doServe(cliopts, cliopts.HTTPHostPort, &defaultHandler{}, NoAuth)
+func ServeMTLS(opts *server.ServerOptions) error {
+	return doServe(opts, opts.HTTPHostPort, &defaultHandler{}, auth.NoAuth)
 }
 
-func doServe(cliopts *cmd.CliOptions, listen string, handler http.Handler, authType AuthType) error {
-	caCert, err := ioutil.ReadFile(cliopts.CACertPath)
+func doServe(opts *server.ServerOptions, listen string, handler http.Handler, authType auth.AuthType) error {
+	caCert, err := ioutil.ReadFile(opts.CACertPath)
 	if err != nil {
 		return err
 	}
@@ -60,13 +61,13 @@ func doServe(cliopts *cmd.CliOptions, listen string, handler http.Handler, authT
 	}
 
 	switch authType {
-	case JWTAuth:
+	case auth.JWTAuth:
 		log.Println("HTTP MTLS HMAC(JWT) Listening at", listen)
 	default:
 		log.Println("HTTP MTLS Listening at", listen)
 	}
 
-	err = server.ListenAndServeTLS(cliopts.ServerCertPath, cliopts.ServerKeyPath)
+	err = server.ListenAndServeTLS(opts.ServerCertPath, opts.ServerKeyPath)
 	if err != nil {
 		return err
 	}

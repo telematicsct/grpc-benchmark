@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"github.com/telematicsct/grpc-benchmark/pkg/jwt"
 	"io"
 	"log"
 
@@ -11,31 +10,14 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/telematicsct/grpc-benchmark/dcm"
+	"github.com/telematicsct/grpc-benchmark/pkg/auth"
 )
 
-type AuthType int
-
-const (
-	NoAuth AuthType = iota
-	JWTAuth
-	APIKeyAuth
-	HmacAuth
-)
-
-const (
-	// AuthHeader defines authorization header.
-	AuthHeader = "Authorization"
-	// AuthScheme defines authorization scheme.
-	AuthScheme = "Bearer"
-	// AuthorizationKey is the key used to store authorization token data
-	AuthorizationKey = "authorization"
-)
-
-var jwtToken *jwt.JWT
+var jwtToken *auth.JWT
 
 // dcmServer is used to implement dcm.DCMServer.
 type dcmServer struct {
-	authType AuthType
+	authType auth.AuthType
 
 	apiKey string
 }
@@ -43,14 +25,14 @@ type dcmServer struct {
 //NewDCMServer creates an returns a new DCM server with JWT token
 func NewDCMServer() *dcmServer {
 	dcm := &dcmServer{}
-	dcm.authType = NoAuth
+	dcm.authType = auth.NoAuth
 	return dcm
 }
 
 func NewDCMServerWithJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*dcmServer, error) {
 	dcm := &dcmServer{}
-	dcm.authType = JWTAuth
-	j, err := jwt.New(rsaPrivateKeyFile, rsaPublicKeyFile)
+	dcm.authType = auth.JWTAuth
+	j, err := auth.New(rsaPrivateKeyFile, rsaPublicKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +66,7 @@ func (s *dcmServer) DiagnosticDataStream(stream dcm.DCMService_DiagnosticDataStr
 func (s *dcmServer) DiagnosticData(ctx context.Context, data *dcm.DiagRecorderData) (*dcm.DiagResponse, error) {
 	//time.Sleep(50 * time.Millisecond)
 	switch s.authType {
-	case JWTAuth:
+	case auth.JWTAuth:
 		_, err := jwtAuthFunc(ctx)
 		if err != nil {
 			return nil, err
@@ -100,8 +82,8 @@ func jwtAuthFunc(ctx context.Context) (context.Context, error) {
 		return nil, grpc.Errorf(codes.Unauthenticated, "missing context metadata")
 	}
 
-	keys, ok := meta[AuthorizationKey]
-	if !ok || len(meta[AuthorizationKey]) == 0 {
+	keys, ok := meta[auth.AuthorizationKey]
+	if !ok || len(meta[auth.AuthorizationKey]) == 0 {
 		return nil, grpc.Errorf(codes.Unauthenticated, "no key provided")
 	}
 

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/telematicsct/grpc-benchmark/cmd/mhttp"
+	mhttp "github.com/telematicsct/grpc-benchmark/cmd/mtls/http"
 	"github.com/telematicsct/grpc-benchmark/pkg/client"
 	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 )

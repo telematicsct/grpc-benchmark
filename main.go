@@ -1,13 +1,14 @@
 package main
 
 import (
-	mgrpc "github.com/telematicsct/grpc-benchmark/cmd/mtls/grpc"
-	mhttp "github.com/telematicsct/grpc-benchmark/cmd/mtls/http"
 	"log"
 	"os"
 
-	"github.com/telematicsct/grpc-benchmark/cmd"
 	"github.com/urfave/cli"
+
+	"github.com/telematicsct/grpc-benchmark/server"
+	grpcServer "github.com/telematicsct/grpc-benchmark/server/grpc"
+	httpServer "github.com/telematicsct/grpc-benchmark/server/http"
 )
 
 func main() {
@@ -68,27 +69,27 @@ func main() {
 				certFlag, keyFlag, caFlag,
 			},
 			Action: func(c *cli.Context) error {
-				cliopts := cmd.NewCliOptions(c)
+				opts := server.NewServerOptions(c)
 				go func() {
-					if err := mhttp.Serve(cliopts); err != nil {
+					if err := httpServer.ServeMTLS(opts); err != nil {
 						log.Fatalf("failed to start http mtls server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := mhttp.ServeHMAC(cliopts); err != nil {
+					if err := httpServer.ServeMTLSHMAC(opts); err != nil {
 						log.Fatalf("failed to start http mtls (HMAC) server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := mgrpc.Serve(cliopts); err != nil {
+					if err := grpcServer.ServeMTLS(opts); err != nil {
 						log.Fatalf("failed to start gRPC mtls server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := mgrpc.ServeHMAC(cliopts); err != nil {
+					if err := grpcServer.ServeMTLSHMAC(opts); err != nil {
 						log.Fatalf("failed to start gRPC mtls (HMAC) server: %s", err)
 					}
 				}()
@@ -101,7 +102,7 @@ func main() {
 			Usage: "https",
 			Flags: []cli.Flag{httpsListenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mhttp.Serve(cmd.NewCliOptions(c))
+				return httpServer.ServeMTLS(server.NewServerOptions(c))
 			},
 		},
 		{
@@ -109,7 +110,7 @@ func main() {
 			Usage: "https-hmac",
 			Flags: []cli.Flag{httpsHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mhttp.Serve(cmd.NewCliOptions(c))
+				return httpServer.ServeMTLS(server.NewServerOptions(c))
 			},
 		},
 		{
@@ -117,7 +118,7 @@ func main() {
 			Usage: "grpc",
 			Flags: []cli.Flag{grpcListenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mgrpc.Serve(cmd.NewCliOptions(c))
+				return grpcServer.ServeMTLS(server.NewServerOptions(c))
 			},
 		},
 		{
@@ -125,7 +126,7 @@ func main() {
 			Usage: "grpc-hmac",
 			Flags: []cli.Flag{grpcHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return mgrpc.ServeHMAC(cmd.NewCliOptions(c))
+				return grpcServer.ServeMTLSHMAC(server.NewServerOptions(c))
 			},
 		},
 	}
