@@ -1,8 +1,10 @@
 package client
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
@@ -13,26 +15,32 @@ const (
 	//CertBasePath base path for certificates
 	CertBasePath = "CERT_BASE_PATH"
 	// HTTPURL is http url
-	HTTPURL     = "HTTPS_URL"
-	HTTPHMACURL = "HTTPS_HMAC_URL"
+	HTTP_MTLS_URL      = "HTTP_MTLS_URL"
+	HTTP_MTLS_HMAC_URL = "HTTP_MTLS_HMAC_URL"
+	HTTP_TLS_HMAC_URL  = "HTTP_TLS_HMAC_URL"
 )
 
 var (
-	httpURL        = env.GetString(HTTPURL, "https://localhost:8443")
-	httpHmacURL    = env.GetString(HTTPHMACURL, "https://localhost:8553")
-	caCertPath     = env.GetString(CertBasePath, "certs/ca.crt")
-	clientCertPath = env.GetString(CertBasePath, "certs/client.crt")
-	clientKeyPath  = env.GetString(CertBasePath, "certs/client.key")
-	jwtTokenPath   = env.GetString(CertBasePath, "certs/jwt.token")
+	httpMTLSSimpleURL = env.GetString(HTTP_MTLS_URL, "https://localhost:8443")
+	httpMTLSHmacURL   = env.GetString(HTTP_MTLS_HMAC_URL, "https://localhost:9443")
+	httpTLSHmacURL    = env.GetString(HTTP_TLS_HMAC_URL, "https://localhost:7443")
+	caCertPath        = env.GetString(CertBasePath, "certs/ca.crt")
+	clientCertPath    = env.GetString(CertBasePath, "certs/client.crt")
+	clientKeyPath     = env.GetString(CertBasePath, "certs/client.key")
+	jwtTokenPath      = env.GetString(CertBasePath, "certs/jwt.token")
 )
 
-// GetHTTPUrl returns http url
-func GetHTTPUrl() string {
-	return httpURL
+// GetHttpUrl returns http url
+func GetHttpMTLSUrl() string {
+	return httpMTLSSimpleURL
 }
 
-func GetHTTPHmacUrl() string {
-	return httpHmacURL
+func GetHttpMTLSHmacUrl() string {
+	return httpMTLSHmacURL
+}
+
+func GetHttpTLSHmacUrl() string {
+	return httpTLSHmacURL
 }
 
 //NewHTTPSClient returns a new https client
@@ -67,4 +75,27 @@ func GetJWTToken() string {
 		return ""
 	}
 	return string(data)
+}
+
+func DoPost(client *http.Client, url string, data interface{}, token string) (*http.Response, error) {
+	if client == nil {
+		hclient, err := NewHTTPSClient()
+		if err != nil {
+			return nil, err
+		}
+		client = hclient
+	}
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(data)
+
+	req, err := http.NewRequest("POST", url, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", token)
+	}
+
+	return client.Do(req)
 }

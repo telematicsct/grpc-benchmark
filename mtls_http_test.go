@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"testing"
@@ -11,7 +10,7 @@ import (
 )
 
 func Benchmark_MTLS_HTTP_JSON(b *testing.B) {
-	client, err := client.NewHTTPSClient()
+	hclient, err := client.NewHTTPSClient()
 	if err != nil {
 		b.Fatalf("error: %v", err)
 	}
@@ -27,17 +26,16 @@ func Benchmark_MTLS_HTTP_JSON(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			doPost(client, data, b)
+			doPost(hclient, client.GetHttpMTLSUrl(), data, "", b)
 		}
 	})
 }
 
-func doPost(hclient *http.Client, data interface{}, b *testing.B) {
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(data)
-	resp, err := hclient.Post(client.GetHTTPUrl(), "application/json", buf)
+func doPost(hclient *http.Client, url string, data interface{}, token string, b *testing.B) {
+	resp, err := client.DoPost(hclient, url, data, token)
 	if err != nil {
 		b.Fatalf("http request failed: %v", err)
+		return
 	}
 
 	defer resp.Body.Close()
@@ -47,9 +45,11 @@ func doPost(hclient *http.Client, data interface{}, b *testing.B) {
 	decodeErr := json.NewDecoder(resp.Body).Decode(&target)
 	if decodeErr != nil {
 		b.Fatalf("unable to decode json: %v", decodeErr)
+		return
 	}
 
 	if target.Code != 200 || target.Message != "OK" {
 		b.Fatalf("http response is wrong: %v", resp)
+		return
 	}
 }

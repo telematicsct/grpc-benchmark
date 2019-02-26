@@ -18,13 +18,33 @@ type defaultHandler struct {
 }
 
 func ServeMTLS(opts *server.ServerOptions) error {
-	return doServe(opts, opts.HTTPHostPort, &defaultHandler{}, auth.NoAuth)
-}
-
-func doServe(opts *server.ServerOptions, listen string, handler http.Handler, authType auth.AuthType) error {
-	caCert, err := ioutil.ReadFile(opts.CACertPath)
+	tlsConfig, err := NewMTLSConfig(opts)
 	if err != nil {
 		return err
+	}
+	return doServe(tlsConfig, opts, opts.HTTPMTLSHostPort, &defaultHandler{}, auth.NoAuth)
+}
+
+func NewTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(opts.CACertPath)
+	if err != nil {
+		return nil, err
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// setup HTTPS client
+	tlsConfig := &tls.Config{
+		RootCAs:    caCertPool,
+		ClientAuth: tls.NoClientCert,
+	}
+	return tlsConfig, nil
+}
+
+func NewMTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(opts.CACertPath)
+	if err != nil {
+		return nil, err
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
@@ -40,7 +60,10 @@ func doServe(opts *server.ServerOptions, listen string, handler http.Handler, au
 		ClientAuth: tls.RequireAndVerifyClientCert,
 	}
 	tlsConfig.BuildNameToCertificate()
+	return tlsConfig, nil
+}
 
+func doServe(tlsConfig *tls.Config, opts *server.ServerOptions, listen string, handler http.Handler, authType auth.AuthType) error {
 	server := &http.Server{
 		Addr:      listen,
 		TLSConfig: tlsConfig,
@@ -54,10 +77,11 @@ func doServe(opts *server.ServerOptions, listen string, handler http.Handler, au
 		log.Println("HTTP MTLS Listening at", listen)
 	}
 
-	err = server.ListenAndServeTLS(opts.ServerCertPath, opts.ServerKeyPath)
+	err := server.ListenAndServeTLS(opts.ServerCertPath, opts.ServerKeyPath)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

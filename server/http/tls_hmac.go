@@ -10,5 +10,9 @@ func ServeTLSHMAC(opts *server.ServerOptions) error {
 	if err != nil {
 		return err
 	}
-	return doServe(opts, opts.HTTPHMACHostPort, &hmacHandler{}, auth.JWTAuth)
+	tlsConfig, err := NewTLSConfig(opts)
+	if err != nil {
+		return err
+	}
+	return doServe(tlsConfig, opts, opts.HTTPTLSHmacHostPort, &hmacHandler{}, auth.JWTAuth)
 }

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log"
-	"net/http"
 	"testing"
 
 	"github.com/telematicsct/grpc-benchmark/pkg/client"
@@ -12,7 +9,7 @@ import (
 )
 
 func Benchmark_MTLS_HTTP_HMAC_JSON(b *testing.B) {
-	client, err := client.NewHTTPSClient()
+	hclient, err := client.NewHTTPSClient()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,40 +25,7 @@ func Benchmark_MTLS_HTTP_HMAC_JSON(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			doHmacPost(client.GetHTTPHmacUrl(), client, data, b)
+			doPost(hclient, client.GetHttpMTLSHmacUrl(), data, client.GetJWTToken(), b)
 		}
 	})
-}
-
-func doHmacPost(url string, hclient *http.Client, data interface{}, b *testing.B) {
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(data)
-
-	req, err := http.NewRequest("POST", url, buf)
-	if err != nil {
-		b.Fatalf("http request failed: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", client.GetJWTToken())
-
-	resp, err := hclient.Do(req)
-	if err != nil {
-		b.Fatalf("http request failed: %v", err)
-		return
-	}
-
-	defer resp.Body.Close()
-
-	// We need to parse response to have a fair comparison as gRPC does it
-	var target payload.DiagResponse
-	decodeErr := json.NewDecoder(resp.Body).Decode(&target)
-	if decodeErr != nil {
-		b.Fatalf("unable to decode json: %v", decodeErr)
-		return
-	}
-
-	if target.Code != 200 || target.Message != "OK" {
-		b.Fatalf("http response is wrong: %v", resp)
-		return
-	}
 }

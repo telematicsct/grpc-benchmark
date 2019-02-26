@@ -13,15 +13,20 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	httpsListenFlag := cli.StringFlag{
-		Name:  "http-listen",
+	httpMTLSSimpleListenFlag := cli.StringFlag{
+		Name:  "http-mtls-listen",
 		Usage: "Listen address",
 		Value: "0.0.0.0:8443",
 	}
-	httpsHmacListenFlag := cli.StringFlag{
-		Name:  "http-hmac-listen",
+	httpMTLSHmacListenFlag := cli.StringFlag{
+		Name:  "http-mtls-hmac-listen",
 		Usage: "Listen address",
-		Value: "0.0.0.0:8553",
+		Value: "0.0.0.0:9443",
+	}
+	httpTLSHmacListenFlag := cli.StringFlag{
+		Name:  "http-tls-hmac-listen",
+		Usage: "Listen address",
+		Value: "0.0.0.0:7443",
 	}
 	grpcListenFlag := cli.StringFlag{
 		Name:  "grpc-listen",
@@ -63,7 +68,7 @@ func main() {
 			Name:  "all",
 			Usage: "all",
 			Flags: []cli.Flag{
-				httpsListenFlag, httpsHmacListenFlag,
+				httpMTLSSimpleListenFlag, httpMTLSHmacListenFlag, httpTLSHmacListenFlag,
 				grpcListenFlag, grpcHmacListenFlag,
 				jwtPrivateKeyFlag, jwtPublicKeyFlag,
 				certFlag, keyFlag, caFlag,
@@ -83,6 +88,12 @@ func main() {
 				}()
 
 				go func() {
+					if err := httpServer.ServeTLSHMAC(opts); err != nil {
+						log.Fatalf("failed to start http tls (HMAC) server: %s", err)
+					}
+				}()
+
+				go func() {
 					if err := grpcServer.ServeMTLS(opts); err != nil {
 						log.Fatalf("failed to start gRPC mtls server: %s", err)
 					}
@@ -98,17 +109,25 @@ func main() {
 			},
 		},
 		{
-			Name:  "https",
-			Usage: "https",
-			Flags: []cli.Flag{httpsListenFlag, certFlag, keyFlag, caFlag},
+			Name:  "http-mtls",
+			Usage: "http-mtls",
+			Flags: []cli.Flag{httpMTLSSimpleListenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
 				return httpServer.ServeMTLS(server.NewServerOptions(c))
 			},
 		},
 		{
-			Name:  "https-hmac",
-			Usage: "https-hmac",
-			Flags: []cli.Flag{httpsHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
+			Name:  "http-mtls-hmac",
+			Usage: "http-mtls-hmac",
+			Flags: []cli.Flag{httpMTLSHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
+			Action: func(c *cli.Context) error {
+				return httpServer.ServeMTLS(server.NewServerOptions(c))
+			},
+		},
+		{
+			Name:  "http-tls-hmac",
+			Usage: "http-tls-hmac",
+			Flags: []cli.Flag{httpTLSHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
 				return httpServer.ServeMTLS(server.NewServerOptions(c))
 			},

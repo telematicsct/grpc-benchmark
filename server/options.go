@@ -5,22 +5,24 @@ import (
 )
 
 type ServerOptions struct {
-	HTTPHostPort     string
-	HTTPHMACHostPort string
-	GRPCHostPort     string
-	GRPCHMACHostPort string
-	ServerCertPath   string
-	ServerKeyPath    string
-	CACertPath       string
-	AuthKey          string
-	JWTPrivateKey    string
-	JWTPublicKey     string
+	HTTPMTLSHostPort     string
+	HTTPTLSHmacHostPort  string
+	HTTPMTLSHmacHostPort string
+	GRPCHostPort         string
+	GRPCHMACHostPort     string
+	ServerCertPath       string
+	ServerKeyPath        string
+	CACertPath           string
+	AuthKey              string
+	JWTPrivateKey        string
+	JWTPublicKey         string
 }
 
 func NewServerOptions(c *cli.Context) *ServerOptions {
 	opts := &ServerOptions{}
-	opts.HTTPHostPort = c.String("http-listen")
-	opts.HTTPHMACHostPort = c.String("http-hmac-listen")
+	opts.HTTPMTLSHostPort = c.String("http-mtls-listen")
+	opts.HTTPTLSHmacHostPort = c.String("http-tls-hmac-listen")
+	opts.HTTPMTLSHmacHostPort = c.String("http-mtls-hmac-listen")
 	opts.GRPCHostPort = c.String("grpc-listen")
 	opts.GRPCHMACHostPort = c.String("grpc-hmac-listen")
 	opts.CACertPath = c.String("ca")

@@ -35,7 +35,11 @@ func ServeMTLSHMAC(opts *server.ServerOptions) error {
 	if err != nil {
 		return err
 	}
-	return doServe(opts, opts.HTTPHMACHostPort, &hmacHandler{}, auth.JWTAuth)
+	tlsConfig, err := NewMTLSConfig(opts)
+	if err != nil {
+		return err
+	}
+	return doServe(tlsConfig, opts, opts.HTTPMTLSHmacHostPort, &hmacHandler{}, auth.JWTAuth)
 }
 
 func (*hmacHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

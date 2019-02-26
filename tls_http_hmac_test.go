@@ -9,7 +9,7 @@ import (
 )
 
 func Benchmark_TLS_HTTP_HMAC_JSON(b *testing.B) {
-	client, err := client.NewHTTPSClient()
+	hclient, err := client.NewHTTPSClient()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func Benchmark_TLS_HTTP_HMAC_JSON(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			doHmacPost(client.GetHTTPHmacUrl(), client, data, b)
+			doPost(hclient, client.GetHttpTLSHmacUrl(), data, client.GetJWTToken(), b)
 		}
 	})
 }
