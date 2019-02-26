@@ -6,6 +6,7 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/telematicsct/grpc-benchmark/pkg/auth"
 	"github.com/telematicsct/grpc-benchmark/server"
 	grpcServer "github.com/telematicsct/grpc-benchmark/server/grpc"
 	httpServer "github.com/telematicsct/grpc-benchmark/server/http"
@@ -76,19 +77,19 @@ func main() {
 			Action: func(c *cli.Context) error {
 				opts := server.NewServerOptions(c)
 				go func() {
-					if err := httpServer.ServeMTLS(opts); err != nil {
+					if err := httpServer.Serve(opts, server.MTLS, auth.NoAuth); err != nil {
 						log.Fatalf("failed to start http mtls server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := httpServer.ServeMTLSHMAC(opts); err != nil {
+					if err := httpServer.Serve(opts, server.MTLS, auth.JWTAuth); err != nil {
 						log.Fatalf("failed to start http mtls (HMAC) server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := httpServer.ServeTLSHMAC(opts); err != nil {
+					if err := httpServer.Serve(opts, server.TLS, auth.JWTAuth); err != nil {
 						log.Fatalf("failed to start http tls (HMAC) server: %s", err)
 					}
 				}()
@@ -113,7 +114,7 @@ func main() {
 			Usage: "http-mtls",
 			Flags: []cli.Flag{httpMTLSSimpleListenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return httpServer.ServeMTLS(server.NewServerOptions(c))
+				return httpServer.Serve(server.NewServerOptions(c), server.MTLS, auth.NoAuth)
 			},
 		},
 		{
@@ -121,7 +122,7 @@ func main() {
 			Usage: "http-mtls-hmac",
 			Flags: []cli.Flag{httpMTLSHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return httpServer.ServeMTLS(server.NewServerOptions(c))
+				return httpServer.Serve(server.NewServerOptions(c), server.MTLS, auth.JWTAuth)
 			},
 		},
 		{
@@ -129,7 +130,7 @@ func main() {
 			Usage: "http-tls-hmac",
 			Flags: []cli.Flag{httpTLSHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return httpServer.ServeMTLS(server.NewServerOptions(c))
+				return httpServer.Serve(server.NewServerOptions(c), server.TLS, auth.JWTAuth)
 			},
 		},
 		{
