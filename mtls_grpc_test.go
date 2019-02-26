@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/telematicsct/grpc-benchmark/pkg/client"
-	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 	"log"
 	"testing"
+
+	"github.com/telematicsct/grpc-benchmark/pkg/client"
+	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"golang.org/x/net/context"
@@ -12,7 +13,7 @@ import (
 )
 
 func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
-	c, err := client.NewDCMServiceClient("a3bae774238fe11e9b4530aa49b34ad2-baa821165bd29c97.elb.ap-northeast-1.amazonaws.com:7900")
+	c, err := client.NewDCMServiceClient(client.GetGRPCUrl())
 	if err != nil {
 		b.Fatalf("%v", err)
 	}
@@ -38,7 +39,7 @@ func Benchmark_MTLS_GRPC_Protobuf(b *testing.B) {
 }
 
 func Benchmark_MTLS_GRPC_Protobuf_Stream(b *testing.B) {
-	c, err := client.NewDCMServiceClient("a3bae774238fe11e9b4530aa49b34ad2-baa821165bd29c97.elb.ap-northeast-1.amazonaws.com:7900")
+	c, err := client.NewDCMServiceClient(client.GetGRPCUrl())
 	if err != nil {
 		b.Fatalf("%v", err)
 	}

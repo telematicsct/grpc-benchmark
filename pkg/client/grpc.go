@@ -7,9 +7,23 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/telematicsct/grpc-benchmark/pkg/env"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
+
+const (
+	GRPC_URL = "GRPC_URL"
+)
+
+var (
+	grpcURL = env.GetString(GRPC_URL, "localhost:7900")
+)
+
+// GetGRPCUrl grpc url
+func GetGRPCUrl() string {
+	return grpcURL
+}
 
 //NewGRPCClient returns a new gRPC client
 func NewGRPCClient(listenAddr string) (*grpc.ClientConn, error) {

@@ -1,15 +1,17 @@
-package grpc
+package mgrpc
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"google.golang.org/grpc/keepalive"
 	"io/ioutil"
 	"log"
 	"net"
 	"time"
 
+	"google.golang.org/grpc/keepalive"
+
+	"github.com/telematicsct/grpc-benchmark/cmd"
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -18,14 +20,18 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-//Start starts the grpc server with the provided certificate
-func ServeMTLS(listen string, cert string, key string, ca string) error {
-	log.Println("grpc service starting...")
+func Serve(cliopts *cmd.CliOptions) error {
+	dcm := NewDCMServer()
+	log.Println("123Listening at", cliopts.GRPCHostPort)
+	return goServe(cliopts, cliopts.GRPCHostPort, nil, dcm)
+}
 
-	certificate, err := tls.LoadX509KeyPair(cert, key)
+// Start starts the grpc server with the provided certificate
+func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, dcm *dcmServer) error {
+	certificate, err := tls.LoadX509KeyPair(cliopts.ServerCertPath, cliopts.ServerKeyPath)
 
 	certPool := x509.NewCertPool()
-	bs, err := ioutil.ReadFile(ca)
+	bs, err := ioutil.ReadFile(cliopts.CACertPath)
 	if err != nil {
 		return err
 	}
@@ -48,17 +54,23 @@ func ServeMTLS(listen string, cert string, key string, ca string) error {
 		}),
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 	}
+	if option != nil {
+		opts = append(opts, option)
+	}
 
 	gs := grpc.NewServer(opts...)
 
-	dcm := NewDCMServer()
 	pb.RegisterDCMServiceServer(gs, dcm)
 
 	healthServer := health.NewServer()
 	healthServer.SetServingStatus("grpc.health.v1.dcmservice", 1)
 	healthpb.RegisterHealthServer(gs, healthServer)
 
-	log.Println("Listening at", listen)
+	if dcm.jwtPrivateKey != nil {
+		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
+	} else {
+		log.Println("GRPC MTLS Listening at", listen)
+	}
 	ln, err := net.Listen("tcp", listen)
 	if err != nil {
 		return err

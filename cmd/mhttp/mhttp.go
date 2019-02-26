@@ -1,4 +1,4 @@
-package https
+package mhttp
 
 import (
 	"crypto/tls"
@@ -7,7 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
+
+	"github.com/telematicsct/grpc-benchmark/cmd"
 )
 
 type Payload struct {
@@ -24,9 +25,9 @@ type DiagRecorderData struct {
 	Payload *Payload `json:"payload,omitempty"`
 }
 
-func ServerMTLS(addr string, cert string, key string, ca string) error {
+func Serve(cliopts *cmd.CliOptions) error {
 	http.HandleFunc("/", CreateDiagRecorderData)
-	caCert, err := ioutil.ReadFile(ca)
+	caCert, err := ioutil.ReadFile(cliopts.CACertPath)
 	if err != nil {
 		return err
 	}
@@ -46,12 +47,12 @@ func ServerMTLS(addr string, cert string, key string, ca string) error {
 	tlsConfig.BuildNameToCertificate()
 
 	server := &http.Server{
-		Addr:      addr,
+		Addr:      cliopts.GRPCHostPort,
 		TLSConfig: tlsConfig,
 	}
 
-	log.Println("Listening at", addr)
-	err = server.ListenAndServeTLS(cert, key)
+	log.Println("HTTP MTLS Listening at", cliopts.HTTPHostPort)
+	err = server.ListenAndServeTLS(cliopts.ServerCertPath, cliopts.ServerKeyPath)
 	if err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func CreateDiagRecorderData(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	time.Sleep(50 * time.Millisecond)
+	//time.Sleep(50 * time.Millisecond)
 	json.NewEncoder(w).Encode(DiagResponse{
 		Code:    200,
 		Message: "OK",

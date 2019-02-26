@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/telematicsct/grpc-benchmark/pkg/client"
-	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 	"log"
 	"net/http"
 	"testing"
 
-	mtlshttp "github.com/telematicsct/grpc-benchmark/cmd/https"
+	"github.com/telematicsct/grpc-benchmark/cmd/mhttp"
+	"github.com/telematicsct/grpc-benchmark/pkg/client"
+	"github.com/telematicsct/grpc-benchmark/pkg/payload"
 )
 
 var httpclient *http.Client
@@ -27,7 +27,7 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 	if err != nil {
 		b.Fatalf("%v", err)
 	}
-	u := &mtlshttp.DiagRecorderData{CanId: payload.GetCanID(), Payload: &mtlshttp.Payload{Body: body}}
+	u := &mhttp.DiagRecorderData{CanId: payload.GetCanID(), Payload: &mhttp.Payload{Body: body}}
 	b.ResetTimer()
 
 	// for n := 0; n < b.N; n++ {
@@ -41,10 +41,10 @@ func Benchmark_MTLS_HTTP(b *testing.B) {
 	})
 }
 
-func doPost(client *http.Client, data interface{}, b *testing.B) {
+func doPost(hclient *http.Client, data interface{}, b *testing.B) {
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(data)
-	resp, err := client.Post("https://a3bae774238fe11e9b4530aa49b34ad2-baa821165bd29c97.elb.ap-northeast-1.amazonaws.com:8443/", "application/json", buf)
+	resp, err := hclient.Post(client.GetHTTPUrl(), "application/json", buf)
 	if err != nil {
 		b.Fatalf("http request failed: %v", err)
 	}
@@ -52,7 +52,7 @@ func doPost(client *http.Client, data interface{}, b *testing.B) {
 	defer resp.Body.Close()
 
 	// We need to parse response to have a fair comparison as gRPC does it
-	var target mtlshttp.DiagResponse
+	var target mhttp.DiagResponse
 	decodeErr := json.NewDecoder(resp.Body).Decode(&target)
 	if decodeErr != nil {
 		b.Fatalf("unable to decode json: %v", decodeErr)
