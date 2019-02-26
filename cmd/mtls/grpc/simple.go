@@ -1,4 +1,4 @@
-package mgrpc
+package grpc
 
 import (
 	"crypto/tls"

@@ -1,7 +1,8 @@
-package mgrpc
+package grpc
 
 import (
 	"context"
+	"github.com/telematicsct/grpc-benchmark/pkg/jwt"
 	"io"
 	"log"
 
@@ -9,7 +10,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/telematicsct/grpc-benchmark/cmd"
 	"github.com/telematicsct/grpc-benchmark/dcm"
 )
 
@@ -31,7 +31,7 @@ const (
 	AuthorizationKey = "authorization"
 )
 
-var jwt *cmd.JWT
+var jwtToken *jwt.JWT
 
 // dcmServer is used to implement dcm.DCMServer.
 type dcmServer struct {
@@ -50,7 +50,7 @@ func NewDCMServer() *dcmServer {
 func NewDCMServerWithJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*dcmServer, error) {
 	dcm := &dcmServer{}
 	dcm.authType = JWTAuth
-	j, err := cmd.NewJWT(rsaPrivateKeyFile, rsaPublicKeyFile)
+	j, err := jwt.New(rsaPrivateKeyFile, rsaPublicKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func NewDCMServerWithJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*dc
 		return nil, err
 	}
 	log.Println("mgrpc sample jwt token:", token)
-	jwt = j
+	jwtToken = j
 	return dcm, nil
 }
 
@@ -105,7 +105,7 @@ func jwtAuthFunc(ctx context.Context) (context.Context, error) {
 		return nil, grpc.Errorf(codes.Unauthenticated, "no key provided")
 	}
 
-	_, err := jwt.Validate(keys[0])
+	_, err := jwtToken.Validate(keys[0])
 	if err != nil {
 		return nil, grpc.Errorf(codes.Unauthenticated, "invalid token")
 	}

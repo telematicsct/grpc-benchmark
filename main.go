@@ -1,12 +1,12 @@
 package main
 
 import (
+	mgrpc "github.com/telematicsct/grpc-benchmark/cmd/mtls/grpc"
+	mhttp "github.com/telematicsct/grpc-benchmark/cmd/mtls/http"
 	"log"
 	"os"
 
 	"github.com/telematicsct/grpc-benchmark/cmd"
-	"github.com/telematicsct/grpc-benchmark/cmd/mgrpc"
-	"github.com/telematicsct/grpc-benchmark/cmd/mhttp"
 	"github.com/urfave/cli"
 )
 

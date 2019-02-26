@@ -1,4 +1,4 @@
-package cmd
+package jwt
 
 import (
 	"crypto/rsa"
@@ -42,7 +42,8 @@ func parsePublicKey(rsaPublicKeyFile string) (*rsa.PublicKey, error) {
 	return publickey, nil
 }
 
-func NewJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*JWT, error) {
+//New creates a new JWT token
+func New(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*JWT, error) {
 	privateKey, err := parsePrivateKey(rsaPrivateKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("Error prasing private key: %s", err)
@@ -85,3 +86,22 @@ func (j *JWT) Validate(token string) (*jwt.Token, error) {
 	}
 	return nil, err
 }
+
+// type jwt struct {
+// 	token string
+// }
+
+// // New holds per-rpc metadata for the gRPC clients
+// func New(token string) credentials.PerRPCCredentials {
+// 	return jwt{token}
+// }
+
+// func (j jwt) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+// 	return map[string]string{
+// 		"authorization": j.token,
+// 	}, nil
+// }
+
+// func (j jwt) RequireTransportSecurity() bool {
+// 	return true
+// }

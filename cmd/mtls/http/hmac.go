@@ -1,7 +1,8 @@
-package mhttp
+package http
 
 import (
 	"encoding/json"
+	"github.com/telematicsct/grpc-benchmark/pkg/jwt"
 	"log"
 	"net/http"
 
@@ -21,14 +22,14 @@ const (
 	HmacAuth
 )
 
-var jwt *cmd.JWT
+var jwtToken *jwt.JWT
 
 type hmacHandler struct {
 	http.Handler
 }
 
 func newJWT(cliopts *cmd.CliOptions) error {
-	j, err := cmd.NewJWT(cliopts.JWTPrivateKey, cliopts.JWTPublicKey)
+	j, err := jwt.New(cliopts.JWTPrivateKey, cliopts.JWTPublicKey)
 	if err != nil {
 		return err
 	}
@@ -37,7 +38,7 @@ func newJWT(cliopts *cmd.CliOptions) error {
 		return err
 	}
 	log.Println("mhttp sample jwt token:", token)
-	jwt = j
+	jwtToken = j
 	return nil
 }
 
@@ -55,7 +56,7 @@ func (*hmacHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "token missing", 500)
 		return
 	}
-	_, err := jwt.Validate(token)
+	_, err := jwtToken.Validate(token)
 	if err != nil {
 		http.Error(w, "invalid token", 500)
 		return

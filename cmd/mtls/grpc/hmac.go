@@ -1,4 +1,4 @@
-package mgrpc
+package grpc
 
 import (
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
