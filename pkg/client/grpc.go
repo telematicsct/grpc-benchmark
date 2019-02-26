@@ -13,16 +13,22 @@ import (
 )
 
 const (
-	GRPC_URL = "GRPC_URL"
+	GRPC_URL      = "GRPC_URL"
+	GRPC_HMAC_URL = "GRPC_HMAC_URL"
 )
 
 var (
-	grpcURL = env.GetString(GRPC_URL, "localhost:7900")
+	grpcURL     = env.GetString(GRPC_URL, "localhost:7900")
+	grpcHmacURL = env.GetString(GRPC_HMAC_URL, "localhost:8900")
 )
 
 // GetGRPCUrl grpc url
 func GetGRPCUrl() string {
 	return grpcURL
+}
+
+func GetGRPCHmacUrl() string {
+	return grpcHmacURL
 }
 
 //NewGRPCClient returns a new gRPC client

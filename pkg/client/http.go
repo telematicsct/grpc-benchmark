@@ -13,11 +13,13 @@ const (
 	//CertBasePath base path for certificates
 	CertBasePath = "CERT_BASE_PATH"
 	// HTTPURL is http url
-	HTTPURL = "HTTP_URL"
+	HTTPURL     = "HTTPS_URL"
+	HTTPHMACURL = "HTTPS_HMAC_URL"
 )
 
 var (
 	httpURL        = env.GetString(HTTPURL, "https://localhost:8443")
+	httpHmacURL    = env.GetString(HTTPHMACURL, "https://localhost:8553")
 	caCertPath     = env.GetString(CertBasePath, "certs/ca.crt")
 	clientCertPath = env.GetString(CertBasePath, "certs/client.crt")
 	clientKeyPath  = env.GetString(CertBasePath, "certs/client.key")
@@ -26,6 +28,10 @@ var (
 // GetHTTPUrl returns http url
 func GetHTTPUrl() string {
 	return httpURL
+}
+
+func GetHTTPHmacUrl() string {
+	return httpHmacURL
 }
 
 //NewHTTPSClient returns a new https client

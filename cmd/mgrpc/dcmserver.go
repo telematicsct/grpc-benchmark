@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -67,11 +66,11 @@ func NewDCMServerWithJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*dc
 // DiagnosticDataStream records a route composited of a sequence of points.
 // It gets a stream of diagnostic data info, and responds with corresponding data
 func (s *dcmServer) DiagnosticDataStream(stream dcm.DCMService_DiagnosticDataStreamServer) error {
-	start := time.Now()
+	//start := time.Now()
 	for {
 		_, err := stream.Recv()
 		if err == io.EOF {
-			log.Println("finished reading stream. took ", time.Since(start))
+			//log.Println("finished reading stream. took ", time.Since(start))
 			//time.Sleep(50 * time.Millisecond)
 			return stream.SendAndClose(&dcm.DiagResponse{Code: 200, Message: "Done"})
 		}

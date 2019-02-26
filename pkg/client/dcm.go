@@ -6,8 +6,8 @@ import (
 )
 
 //NewDCMServiceClient returns a new DCM service client
-func NewDCMServiceClient(listenAddr string) (pb.DCMServiceClient, error) {
-	conn, err := NewGRPCClient(listenAddr)
+func NewDCMServiceClient(connectAddr string) (pb.DCMServiceClient, error) {
+	conn, err := NewGRPCClient(connectAddr)
 	if err != nil {
 		return nil, err
 	}
