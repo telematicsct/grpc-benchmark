@@ -47,7 +47,7 @@ func Serve(cliopts *cmd.CliOptions) error {
 	tlsConfig.BuildNameToCertificate()
 
 	server := &http.Server{
-		Addr:      cliopts.GRPCHostPort,
+		Addr:      cliopts.HTTPHostPort,
 		TLSConfig: tlsConfig,
 	}
 

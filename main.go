@@ -50,7 +50,7 @@ func main() {
 	jwtPublicKeyFlag := cli.StringFlag{
 		Name:  "jwt-public-key",
 		Usage: "jwt public key",
-		Value: "certs/jwt.pub",
+		Value: "certs/jwt.pub.pem",
 	}
 	jwtPrivateKeyFlag := cli.StringFlag{
 		Name:  "jwt-private-key",
@@ -69,17 +69,24 @@ func main() {
 			},
 			Action: func(c *cli.Context) error {
 				cliopts := cmd.NewCliOptions(c)
-				log.Println("cliopts", cliopts)
 				go func() {
 					if err := mhttp.Serve(cliopts); err != nil {
 						log.Fatalf("failed to start http mtls server: %s", err)
 					}
 				}()
+
 				go func() {
 					if err := mgrpc.Serve(cliopts); err != nil {
 						log.Fatalf("failed to start gRPC mtls server: %s", err)
 					}
 				}()
+
+				go func() {
+					if err := mgrpc.ServeHMAC(cliopts); err != nil {
+						log.Fatalf("failed to start gRPC mtls server: %s", err)
+					}
+				}()
+
 				select {}
 			},
 		},

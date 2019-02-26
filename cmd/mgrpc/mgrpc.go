@@ -22,7 +22,6 @@ import (
 
 func Serve(cliopts *cmd.CliOptions) error {
 	dcm := NewDCMServer()
-	log.Println("123Listening at", cliopts.GRPCHostPort)
 	return goServe(cliopts, cliopts.GRPCHostPort, nil, dcm)
 }
 
@@ -71,6 +70,7 @@ func goServe(cliopts *cmd.CliOptions, listen string, option grpc.ServerOption, d
 	} else {
 		log.Println("GRPC MTLS Listening at", listen)
 	}
+
 	ln, err := net.Listen("tcp", listen)
 	if err != nil {
 		return err

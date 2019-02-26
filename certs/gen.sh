@@ -54,3 +54,8 @@ case $cmd in
     openssl x509 -req -in $1.csr -CA ca.crt -CAkey ca.key -out $1.crt $options -extfile
     ;;
 esac
+
+
+# jwt keys
+# ssh-keygen -t rsa -m pem 
+# openssl rsa -in jwt -pubout -out jwt.pub.pem

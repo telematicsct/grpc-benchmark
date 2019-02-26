@@ -11,17 +11,44 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 )
+
+type AuthType int
+
+const (
+	NoAuth AuthType = iota
+	JWTAuth
+)
+
+const (
+	// AuthHeader defines authorization header.
+	AuthHeader = "Authorization"
+	// AuthScheme defines authorization scheme.
+	AuthScheme = "Bearer"
+	// AuthorizationKey is the key used to store authorization token data
+	AuthorizationKey = "authorization"
+)
+
+var jwtPublicKey *rsa.PublicKey
 
 // dcmServer is used to implement dcm.DCMServer.
 type dcmServer struct {
+	authType AuthType
+
 	jwtPrivateKey *rsa.PrivateKey
 	jwtPublicKey  *rsa.PublicKey
+
+	apiKey string
 }
 
 //NewDCMServer creates an returns a new DCM server with JWT token
 func NewDCMServer() *dcmServer {
-	return &dcmServer{}
+	dcm := &dcmServer{}
+	dcm.authType = NoAuth
+	return dcm
 }
 
 func parsePrivateKey(rsaPrivateKeyFile string) (*rsa.PrivateKey, error) {
@@ -72,8 +99,13 @@ func NewDCMServerWithJWT(rsaPrivateKeyFile string, rsaPublicKeyFile string) (*dc
 	if err != nil {
 		return nil, fmt.Errorf("Error signing the token: %s", err)
 	}
-	log.Println("auth-token: %v", tokenString)
-	return &dcmServer{privateKey, publicKey}, nil
+	log.Println("auth-token:", tokenString)
+	dcm := &dcmServer{}
+	dcm.authType = JWTAuth
+	dcm.jwtPrivateKey = privateKey
+	dcm.jwtPublicKey = publicKey
+	jwtPublicKey = publicKey
+	return dcm, nil
 }
 
 // DiagnosticDataStream records a route composited of a sequence of points.
@@ -96,8 +128,42 @@ func (s *dcmServer) DiagnosticDataStream(stream pb.DCMService_DiagnosticDataStre
 
 func (s *dcmServer) DiagnosticData(ctx context.Context, data *pb.DiagRecorderData) (*pb.DiagResponse, error) {
 	//time.Sleep(50 * time.Millisecond)
+	switch s.authType {
+	case JWTAuth:
+		_, err := jwtAuthFunc(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
 	response := &pb.DiagResponse{Code: 200, Message: "Done"}
 	return response, nil
+}
+
+func jwtAuthFunc(ctx context.Context) (context.Context, error) {
+	meta, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, grpc.Errorf(codes.Unauthenticated, "missing context metadata")
+	}
+
+	keys, ok := meta[AuthorizationKey]
+	if !ok || len(meta[AuthorizationKey]) == 0 {
+		return nil, grpc.Errorf(codes.Unauthenticated, "no key provided")
+	}
+
+	_, err := validateToken(keys[0], jwtPublicKey)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Unauthenticated, "invalid token")
+	}
+
+	// val, err := grpc_auth.AuthFromMD(ctx, AuthHeader)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if val != APIKey {
+	// 	log.Fatalln("invalid api key")
+	// 	return nil, grpc.Errorf(codes.Unauthenticated, "Invalid API key")
+	// }
+	return ctx, nil
 }
 
 func validateToken(token string, publicKey *rsa.PublicKey) (*jwt.Token, error) {
