@@ -4,40 +4,31 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"github.com/telematicsct/grpc-benchmark/pkg/service"
 	"io/ioutil"
 	"log"
 	"net"
 	"time"
 
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/keepalive"
 
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
-	"github.com/telematicsct/grpc-benchmark/pkg/service"
 	"github.com/telematicsct/grpc-benchmark/server"
 )
 
-func Serve(opts *server.ServerOptions, tlsType server.TLSType, authType auth.AuthType) error {
-	listen := opts.GetBind(server.GRPC, tlsType, authType)
+//ServeMTLS creates and serves gRPC MTLS server
+func ServeMTLS(opts *server.ServerOptions) error {
+	dcm := service.NewDCMService()
+	return goServe(opts, opts.GRPCHostPort, nil, dcm)
+}
 
-	var dcm *service.DCM
-	var err error
-
-	switch authType {
-	case auth.JWTAuth:
-		dcm, err = service.NewDCMServiceWithJWT(opts.JWTPrivateKey, opts.JWTPublicKey)
-		if err != nil {
-			return err
-		}
-	default:
-		dcm = service.NewDCMService()
-	}
-
+// Start starts the grpc server with the provided certificate
+func goServe(opts *server.ServerOptions, listen string, grpcoption grpc.ServerOption, dcm *service.DCM) error {
 	certificate, err := tls.LoadX509KeyPair(opts.ServerCertPath, opts.ServerKeyPath)
 
 	certPool := x509.NewCertPool()
@@ -64,13 +55,8 @@ func Serve(opts *server.ServerOptions, tlsType server.TLSType, authType auth.Aut
 		}),
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 	}
-
-	switch authType {
-	case auth.JWTAuth:
-		grpcopts = append(grpcopts, grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(auth.JWTAuthFunc(dcm.Token))))
-		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
-	default:
-		log.Println("GRPC MTLS Listening at", listen)
+	if grpcoption != nil {
+		grpcopts = append(grpcopts, grpcoption)
 	}
 
 	gs := grpc.NewServer(grpcopts...)
@@ -79,7 +65,14 @@ func Serve(opts *server.ServerOptions, tlsType server.TLSType, authType auth.Aut
 
 	healthServer := health.NewServer()
 	healthServer.SetServingStatus("grpc.health.v1.dcmservice", 1)
-	grpc_health_v1.RegisterHealthServer(gs, healthServer)
+	healthpb.RegisterHealthServer(gs, healthServer)
+
+	switch dcm.AuthType {
+	case auth.JWTAuth:
+		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
+	default:
+		log.Println("GRPC MTLS Listening at", listen)
+	}
 
 	ln, err := net.Listen("tcp", listen)
 	if err != nil {
