@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"github.com/telematicsct/grpc-benchmark/pkg/service"
 	"io/ioutil"
 	"log"
 	"net"
@@ -20,13 +21,14 @@ import (
 	"github.com/telematicsct/grpc-benchmark/server"
 )
 
+//ServeMTLS creates and serves gRPC MTLS server
 func ServeMTLS(opts *server.ServerOptions) error {
-	dcm := NewDCMServer()
+	dcm := service.NewDCMService()
 	return goServe(opts, opts.GRPCHostPort, nil, dcm)
 }
 
 // Start starts the grpc server with the provided certificate
-func goServe(opts *server.ServerOptions, listen string, grpcoption grpc.ServerOption, dcm *dcmServer) error {
+func goServe(opts *server.ServerOptions, listen string, grpcoption grpc.ServerOption, dcm *service.DCM) error {
 	certificate, err := tls.LoadX509KeyPair(opts.ServerCertPath, opts.ServerKeyPath)
 
 	certPool := x509.NewCertPool()
@@ -65,7 +67,7 @@ func goServe(opts *server.ServerOptions, listen string, grpcoption grpc.ServerOp
 	healthServer.SetServingStatus("grpc.health.v1.dcmservice", 1)
 	healthpb.RegisterHealthServer(gs, healthServer)
 
-	switch dcm.authType {
+	switch dcm.AuthType {
 	case auth.JWTAuth:
 		log.Println("GRPC MTLS HMAC(JWT) Listening at", listen)
 	default:

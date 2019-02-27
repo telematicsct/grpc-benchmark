@@ -1,8 +1,12 @@
 package auth
 
 import (
+	"context"
 	"crypto/rsa"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"log"
 	"time"
@@ -83,4 +87,25 @@ func (j *JWT) Validate(token string) (*jwt.Token, error) {
 		return jwtToken, nil
 	}
 	return nil, err
+}
+
+//JWTAuthFunc returns a authentication function for a given token
+func JWTAuthFunc(jwtToken *JWT) func(context.Context) (context.Context, error) {
+	return func(ctx context.Context) (context.Context, error) {
+		meta, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return nil, grpc.Errorf(codes.Unauthenticated, "missing context metadata")
+		}
+
+		keys, ok := meta[AuthorizationKey]
+		if !ok || len(meta[AuthorizationKey]) == 0 {
+			return nil, grpc.Errorf(codes.Unauthenticated, "no key provided")
+		}
+
+		_, err := jwtToken.Validate(keys[0])
+		if err != nil {
+			return nil, grpc.Errorf(codes.Unauthenticated, "invalid token")
+		}
+		return ctx, nil
+	}
 }

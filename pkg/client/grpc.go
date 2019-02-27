@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/telematicsct/grpc-benchmark/pkg/env"
 	"google.golang.org/grpc"
@@ -19,8 +20,8 @@ const (
 )
 
 var (
-	grpcURL     = env.GetString(GRPC_URL, TARGET_HOST+":7900")
-	grpcHmacURL = env.GetString(GRPC_HMAC_URL, TARGET_HOST+":8900")
+	grpcURL     = env.GetString(GRPC_URL, targetHost+":7900")
+	grpcHmacURL = env.GetString(GRPC_HMAC_URL, targetHost+":8900")
 )
 
 // GetGRPCUrl grpc url
@@ -63,6 +64,7 @@ func NewGRPCClient(listenAddr string, token string) (*grpc.ClientConn, error) {
 
 	opts := []grpc.DialOption{
 		grpc.WithBlock(),
+		grpc.WithTimeout(30 * time.Second),
 		grpc.WithTransportCredentials(transportCreds),
 		// grpc.WithDefaultCallOptions(grpc.UseCompressor("gzip")),
 	}
