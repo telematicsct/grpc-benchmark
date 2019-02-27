@@ -95,13 +95,13 @@ func main() {
 				}()
 
 				go func() {
-					if err := grpcServer.ServeMTLS(opts); err != nil {
+					if err := grpcServer.Serve(opts, server.MTLS, auth.NoAuth); err != nil {
 						log.Fatalf("failed to start gRPC mtls server: %s", err)
 					}
 				}()
 
 				go func() {
-					if err := grpcServer.ServeMTLSHMAC(opts); err != nil {
+					if err := grpcServer.Serve(opts, server.MTLS, auth.JWTAuth); err != nil {
 						log.Fatalf("failed to start gRPC mtls (HMAC) server: %s", err)
 					}
 				}()
@@ -138,7 +138,7 @@ func main() {
 			Usage: "grpc",
 			Flags: []cli.Flag{grpcListenFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return grpcServer.ServeMTLS(server.NewServerOptions(c))
+				return grpcServer.Serve(server.NewServerOptions(c), server.MTLS, auth.NoAuth)
 			},
 		},
 		{
@@ -146,7 +146,7 @@ func main() {
 			Usage: "grpc-hmac",
 			Flags: []cli.Flag{grpcHmacListenFlag, jwtPrivateKeyFlag, jwtPublicKeyFlag, certFlag, keyFlag, caFlag},
 			Action: func(c *cli.Context) error {
-				return grpcServer.ServeMTLSHMAC(server.NewServerOptions(c))
+				return grpcServer.Serve(server.NewServerOptions(c), server.MTLS, auth.JWTAuth)
 			},
 		},
 	}
