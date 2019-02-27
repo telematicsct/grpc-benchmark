@@ -11,9 +11,11 @@ PS: Running locally both the server and benchmarking test will skew the results.
 ![Test Setup](/setup.png)
 
 
+CY17 max diagnostic data upload size is 512MB. It is expected to be higher for CY17+. So 1MB is chosen.
+
 ## Benchmark Runs (using go test)
 
-### Shinkansen Test
+### Shinkansen Test (1 MB)
 
 |   Benchmarks        |   N           |    Latency (Nanosecond/operation)  |    Bandwith (bytes/operation)  |   Memory (allocations/operation)  |
 | ------------- |:-------------:| -----:| -----:|-----:|
