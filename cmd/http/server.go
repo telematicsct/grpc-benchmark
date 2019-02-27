@@ -8,9 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/telematicsct/grpc-benchmark/cmd"
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
 	"github.com/telematicsct/grpc-benchmark/pkg/payload"
-	"github.com/telematicsct/grpc-benchmark/server"
 )
 
 var jwtToken *auth.JWT
@@ -21,10 +21,12 @@ type httpHandler struct {
 	authType auth.AuthType
 }
 
+//Serve starts the server with given options
 func Serve(opts *server.ServerOptions, tlsType server.TLSType, authType auth.AuthType) error {
 	return doServe(&httpHandler{opts, tlsType, authType})
 }
 
+//NewTLSConfig returns a new TLS config
 func NewTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
 	caCert, err := ioutil.ReadFile(opts.CACertPath)
 	if err != nil {
@@ -41,6 +43,7 @@ func NewTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
 	return tlsConfig, nil
 }
 
+//NewMTLSConfig returns a new mTLS config
 func NewMTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
 	caCert, err := ioutil.ReadFile(opts.CACertPath)
 	if err != nil {
@@ -51,12 +54,7 @@ func NewMTLSConfig(opts *server.ServerOptions) (*tls.Config, error) {
 
 	// setup HTTPS client
 	tlsConfig := &tls.Config{
-		ClientCAs: caCertPool,
-		// NoClientCent
-		// RequestClientCert
-		// RequiredAnyClientCert
-		// VerifyClientCartIfGiven
-		// RequireAndVerifyClientCert
+		ClientCAs:  caCertPool,
 		ClientAuth: tls.RequireAndVerifyClientCert,
 	}
 	tlsConfig.BuildNameToCertificate()
@@ -99,7 +97,7 @@ func doServe(h *httpHandler) error {
 		return err
 	}
 
-	listen := h.opts.GetBind(server.HTTP, h.tlsType, h.authType)
+	listen := h.opts.GetHostPort(server.HTTP, h.tlsType, h.authType)
 	server := &http.Server{
 		Addr:      listen,
 		TLSConfig: tlsConfig,

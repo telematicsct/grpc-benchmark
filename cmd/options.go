@@ -33,6 +33,7 @@ type ServerOptions struct {
 	JWTPublicKey         string
 }
 
+//NewServerOptions returns Server Opts from client parameters
 func NewServerOptions(c *cli.Context) *ServerOptions {
 	opts := &ServerOptions{}
 	opts.HTTPMTLSHostPort = c.String("http-mtls-listen")
@@ -49,8 +50,8 @@ func NewServerOptions(c *cli.Context) *ServerOptions {
 	return opts
 }
 
-// GetBind returns the bind (hostport) string for the protocol, tls, auth type.
-func (o *ServerOptions) GetBind(protocol ProtocolType, tls TLSType, authType auth.AuthType) string {
+// GetHostPort returns the bind (hostport) string for the protocol, tls, auth type.
+func (o *ServerOptions) GetHostPort(protocol ProtocolType, tls TLSType, authType auth.AuthType) string {
 	switch protocol {
 	case HTTP:
 		switch tls {

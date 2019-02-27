@@ -1,6 +1,30 @@
 # gRPC Http mTLS Hmac benchmarking
 
+## Development
+
+Run `make servers` and then `make test`
+
+PS: Running locally both the server and benchmarking test will skew the results. Please change the `TARGET_HOST` to your remote server before running the code.
+
+## Benchmark Setup
+
+![Test Setup](/setup.png)
+
+
 ## Benchmark Runs (using go test)
+
+### Shinkansen Test
+
+|   Benchmarks        |   N           |    Latency (Nanosecond/operation)  |    Bandwith (bytes/operation)  |   Memory (allocations/operation)  |
+| ------------- |:-------------:| -----:| -----:|-----:|
+|   Benchmark_MTLS_GRPC_HMAC_Protobuf-8          |   10      |     232329677 ns/op  |     128794 B/op    |    108 allocs/op  |
+|   Benchmark_MTLS_GRPC_HMAC_Protobuf_Stream-8   |   10      |     223537533 ns/op  |     129587 B/op    |    112 allocs/op  |
+|   Benchmark_MTLS_GRPC_Protobuf-8               |   10      |     192687629 ns/op  |     127694 B/op    |    103 allocs/op  |
+|   Benchmark_MTLS_GRPC_Protobuf_Stream-8        |   10      |     214624319 ns/op  |     128323 B/op    |    110 allocs/op  |
+|   Benchmark_MTLS_HTTP_HMAC_JSON-8              |   1       |    1214743491 ns/op  |     634212 B/op    |   1232 allocs/op  |
+|   Benchmark_MTLS_HTTP_JSON-8                   |   1       |    1173860561 ns/op  |     604352 B/op    |   1373 allocs/op  |
+|   Benchmark_TLS_HTTP_HMAC_JSON-8               |   1       |    1194234338 ns/op  |     603127 B/op    |   1367 allocs/op  |
+
 
 ### Data: 100KB
 
@@ -72,3 +96,4 @@ As per the reports above
 - for 100kb data, gRPC with mTLS (avg: 120ms) is faster than https with mTLS (avg: 850ms)
 - 1mb or 100kb data, https has same average response time.
 - gRPC mTLS with HMAC or without HMAC -- doesn't make a big difference.
+- bandwidth and memory is quite stable for gRPC irrespective of network

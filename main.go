@@ -6,10 +6,10 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/telematicsct/grpc-benchmark/cmd"
+	grpcServer "github.com/telematicsct/grpc-benchmark/cmd/grpc"
+	httpServer "github.com/telematicsct/grpc-benchmark/cmd/http"
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
-	"github.com/telematicsct/grpc-benchmark/server"
-	grpcServer "github.com/telematicsct/grpc-benchmark/server/grpc"
-	httpServer "github.com/telematicsct/grpc-benchmark/server/http"
 )
 
 func main() {
