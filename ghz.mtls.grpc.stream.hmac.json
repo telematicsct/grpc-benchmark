@@ -1,6 +1,6 @@
 {
     "proto": "./dcm/dcm.proto",
-    "call": "dcm.DCMService.DiagnosticDataHMAC",
+    "call": "dcm.DCMService.DiagnosticDataStream",
     "cacert": "certs/ca.crt",
     "cert": "certs/client.crt",
     "key": "certs/client.key",
