@@ -4,8 +4,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"go4.org/net/throttle"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/telematicsct/grpc-benchmark/cmd"
@@ -104,6 +106,11 @@ func doServe(h *httpHandler) error {
 		Handler:   h,
 	}
 
+	l, err := net.Listen("tcp", listen)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	switch h.authType {
 	case auth.JWTAuth:
 		log.Println("HTTP MTLS HMAC(JWT) Listening at", listen)
@@ -111,12 +118,17 @@ func doServe(h *httpHandler) error {
 		log.Println("HTTP MTLS Listening at", listen)
 	}
 
-	err = server.ListenAndServeTLS(h.opts.ServerCertPath, h.opts.ServerKeyPath)
-	if err != nil {
-		return err
-	}
+	rate := throttle.Rate{Latency: h.opts.Latency}
+	l = &throttle.Listener{Listener: l, Up: rate, Down: rate}
 
-	return nil
+	return server.ServeTLS(l, h.opts.ServerCertPath, h.opts.ServerKeyPath)
+
+	// err = server.ListenAndServeTLS(h.opts.ServerCertPath, h.opts.ServerKeyPath)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// return nil
 }
 
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

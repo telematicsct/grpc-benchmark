@@ -9,6 +9,7 @@ import (
 	pb "github.com/telematicsct/grpc-benchmark/dcm"
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
 	"github.com/telematicsct/grpc-benchmark/pkg/service"
+	"go4.org/net/throttle"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
@@ -103,6 +104,9 @@ func (s *Server) Serve() error {
 	if err != nil {
 		return err
 	}
+
+	rate := throttle.Rate{Latency: s.ServerOpts.Latency}
+	ln = &throttle.Listener{Listener: ln, Up: rate, Down: rate}
 
 	return gs.Serve(ln)
 }

@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/telematicsct/grpc-benchmark/pkg/auth"
 	"github.com/urfave/cli"
+	"time"
 )
 
 type ProtocolType int
@@ -19,6 +20,7 @@ const (
 	MTLS
 )
 
+//ServerOptions dynamic options for server
 type ServerOptions struct {
 	HTTPMTLSHostPort     string
 	HTTPTLSHmacHostPort  string
@@ -31,6 +33,7 @@ type ServerOptions struct {
 	AuthKey              string
 	JWTPrivateKey        string
 	JWTPublicKey         string
+	Latency              time.Duration
 }
 
 //NewServerOptions returns Server Opts from client parameters
@@ -47,6 +50,7 @@ func NewServerOptions(c *cli.Context) *ServerOptions {
 	opts.AuthKey = c.String("auth-key")
 	opts.JWTPrivateKey = c.String("jwt-private-key")
 	opts.JWTPublicKey = c.String("jwt-public-key")
+	opts.Latency = c.Duration("latency")
 	return opts
 }
 

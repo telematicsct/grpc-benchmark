@@ -57,6 +57,10 @@ test:
 servers:
 	go run main.go all
 
+.PHONY: shinkansen-servers
+shinkansen-servers:
+	go run main.go all --latency=300ms
+
 .PHONY: grpc
 grpc:
 	go run main.go grpc

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/urfave/cli"
 
@@ -64,6 +65,11 @@ func main() {
 		Usage: "jwt private key",
 		Value: "certs/jwt",
 	}
+	latency := cli.DurationFlag{
+		Name:  "latency",
+		Usage: "Latency for servers. To simulate high latency networks",
+		Value: 10 * time.Millisecond,
+	}
 	app.Commands = []cli.Command{
 		{
 			Name:  "all",
@@ -72,7 +78,7 @@ func main() {
 				httpMTLSSimpleListenFlag, httpMTLSHmacListenFlag, httpTLSHmacListenFlag,
 				grpcListenFlag, grpcHmacListenFlag,
 				jwtPrivateKeyFlag, jwtPublicKeyFlag,
-				certFlag, keyFlag, caFlag,
+				certFlag, keyFlag, caFlag, latency,
 			},
 			Action: func(c *cli.Context) error {
 				opts := server.NewServerOptions(c)

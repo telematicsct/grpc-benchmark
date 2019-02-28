@@ -5,6 +5,7 @@ require (
 	github.com/golang/protobuf v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/urfave/cli v1.20.0
+	go4.org v0.0.0-20190218023631-ce4c26f7be8e
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
 	google.golang.org/grpc v1.18.0
