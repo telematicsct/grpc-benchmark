@@ -4,7 +4,7 @@
 
 Run `make servers` and then `make test`
 
-PS: Running locally both the server and benchmarking test will skew the results. Please change the `TARGET_HOST` to your remote server before running the code.
+PS: Running locally both the server and benchmarking test wont tell you the real story. Please change the `TARGET_HOST` to your remote server before running the code.
 
 ## Benchmark Setup
 
