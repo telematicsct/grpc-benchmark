@@ -4,7 +4,7 @@
 
 Run `make servers` and then `make test`
 
-PS: Running locally both the server and benchmarking test will skew the results. Please change the `TARGET_HOST` to your remote server before running the code.
+PS: Running locally both the server and benchmarking test wont tell you the real story. Please change the `TARGET_HOST` to your remote server before running the code.
 
 ## Benchmark Setup
 
@@ -27,6 +27,9 @@ CY17 max diagnostic data upload size is 512MB. It is expected to be higher for C
 |   Benchmark_MTLS_HTTP_JSON-8                   |   1       |    1173860561 ns/op  |     604352 B/op    |   1373 allocs/op  |
 |   Benchmark_TLS_HTTP_HMAC_JSON-8               |   1       |    1194234338 ns/op  |     603127 B/op    |   1367 allocs/op  |
 
+
+To simulate high latency networks locally please run `make shinkansen-servers` and then run `make test`. 
+`make shinkansen-servers` will introduce a 300ms latency throttling in the server simulating the real life situation.
 
 ### Data: 100KB
 
